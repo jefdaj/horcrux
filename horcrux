@@ -163,14 +163,8 @@ def recreate_password(threshold, share_paths, stego_pass, verbose):
     if verbose:
         print 'trying to reconstruct password from %d shares...' % threshold,
     cmd = ['ssss-combine', '-t', str(threshold)]
-    shares = ''
+    shares = '' # newline-separated list of shares
     for path in share_paths:
-        # unhide any hidden shares first
-        # TODO do this earlier, and as a separate fn that can be part of verify too
-        if not path.endswith('.key'): # TODO use char count instead?
-            unhidden = mktemp() # TODO figure out how to do this in a context or auto-delete after
-            unhide(path, unhidden, stego_pass, verbose)
-            path = unhidden
         with open(path, 'r') as f:
             shares += f.read()
     proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -257,6 +251,18 @@ def unhide(stego_file, outfile, passphrase, verbose):
         cmd.append('--quiet')
     check_call(cmd)
 
+def unhide_any(gpg, shares, passphrase, verbose):
+    # unhides and hidden shares and gives back a key-only list
+    regular  = [s for s in shares if     s.endswith('.key')]
+    hidden   = [s for s in shares if not s.endswith('.key')]
+    unhidden = []
+    for n in range(len(hidden)):
+        stego_file = hidden[n]
+        tmpfile    = mktemp()
+        unhide(stego_file, tmpfile, passphrase, verbose)
+        unhidden.append(tmpfile)
+    return sorted(regular) + sorted(unhidden)
+
 ###############
 # auto-verify #
 ###############
@@ -284,7 +290,6 @@ def auto_verify(gpg, working_dir, verbose):
     if len(files['verify_key']) >  1: print 'found multiple verify keys'
     if len(files['secret'    ]) == 0: print 'secret file not found'
     key = files['verify_key'][0]
-    secrets = sorted(files['secret'])
     for signed_file in files['secret'] + files['shares']:
         verify(gpg, key, signed_file, verbose)
 
@@ -295,16 +300,17 @@ def auto_verify(gpg, working_dir, verbose):
 def auto_decrypt(gpg, working_dir, verbose):
     auto_verify(gpg, working_dir, verbose)
     files = find_files(working_dir)
-    if len(files['decrypt_key']) == 0: print 'decrypt key not found'
-    if len(files['decrypt_key'])  > 1: print 'multiple decrypt keys found'
-    if len(files['secret'     ]) == 0: print 'no secret files found'
-    decrypt_key = files['decrypt_key'][0]
     shares  = sorted(files['shares'])
     secrets = sorted(files['secret'])
-    if len(shares) == 0: print 'no password shares found'
+    if len(files['decrypt_key']) == 0: raise SystemExit('decrypt key not found')
+    if len(files['decrypt_key'])  > 1: raise SystemExit('multiple decrypt keys found')
+    if len(shares ) == 0: raise SystemExit('no password shares found')
+    if len(secrets) == 0: raise SystemExit('no secret files found')
+    decrypt_key = files['decrypt_key'][0]
     stego_pass  = sha256sum(decrypt_key, verbose)
+    shares      = unhide_any(gpg, shares, stego_pass, verbose)
     master_pass = auto_recreate_password(shares, stego_pass, verbose)
-    for secret in files['secret']:
+    for secret in secrets:
         outfile = splitext(secret)[0]
         decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose)
 
@@ -335,6 +341,7 @@ def main(args):
         outfile     = args['<output-path>']
         shares      = args['<share>']
         stego_pass  = sha256sum(decrypt_key, verbose)
+        shares      = unhide_any(gpg, shares, stego_pass, verbose)
         master_pass = auto_recreate_password(shares, stego_pass, verbose)
         decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose, verify_key)
 
