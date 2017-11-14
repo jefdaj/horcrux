@@ -194,6 +194,13 @@ def auto_recreate_password(share_paths, verbose):
     print 'failed to reconstruct password'
     raise SystemExit(1)
 
+def untar(tarfile, verbose):
+    outdir = tarfile.split('.tar')[0]
+    if verbose:
+        print 'extracting %s to %s' % (tarfile, outdir)
+    cmd = ['tar', 'xv', '-f', tarfile, '--one-top-level=%s' % outdir]
+    check_call(cmd)
+
 def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
     if verbose:
         msg = 'decrypting %s with %s and the password (output in %s)'
@@ -206,6 +213,8 @@ def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
         print status.stderr
         raise SystemExit(1)
     print 'decrypted %s to %s' % (secretfile, outfile)
+    if outfile.endswith('.tar'):
+        untar(outfile, verbose)
 
 def decrypt(gpg, decrypt_key, secretfile, outfile, verbose,
             verify_key=None, signature_file=None, passwd=None, shares=[]):
