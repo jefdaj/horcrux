@@ -1,5 +1,7 @@
 #!/usr/bin/env python2
 
+# TODO make permissions accessible to non-root user
+
 '''
 Horcrux: signed, updatable secrets unlocked by N of M optionally hidden keys
 
@@ -9,8 +11,8 @@ Usage:
   horcrux [-v] autodecrypt [<working-dir>]
   horcrux [-v] setup   <threshold> <shares> [<output-dir>]
   horcrux [-v] encrypt <encrypt-key> <sign-key> <file-to-encrypt> <output-path>
-  horcrux [-v] verify  <verify-key> <locked-file> <sig-file>
-  horcrux [-v] decrypt <decrypt-key> <verify-key> <locked-file> <sig-file> <output-path> <share>...
+  horcrux [-v] verify  <verify-key> <locked-file>
+  horcrux [-v] decrypt <decrypt-key> <verify-key> <locked-file> <output-path> <share>...
   horcrux [-v] hide    <decrypt_key> <file-to-hide> <cover-file> <output-path>
   horcrux [-v] unhide  <decrypt_key> <stego-file> <output-path>
 
@@ -39,7 +41,7 @@ def create_password(nchars, verbose):
     cmd = ['pwgen', '--secure', str(nchars), '1']
     return check_output(cmd)
 
-def create_shares(passwd, threshold, nshares, output_dir, verbose):
+def create_shares(gpg, passwd, threshold, nshares, output_dir, verbose):
     if verbose:
         msg = 'splitting the password into %d shares, any %d of which can reconstruct it'
         print msg % (nshares, threshold)
@@ -57,6 +59,8 @@ def create_shares(passwd, threshold, nshares, output_dir, verbose):
         assert len(share) == 258 # TODO not needed if we test round trip later?
         with open(path, 'w') as f:
             f.write('%s\n' % share)
+        # TODO do I need to take a hash first and sign that or something?
+        sign_file(gpg, 'verify', path, verbose)
 
 def create_keyring(home, verbose):
     if verbose:
@@ -94,9 +98,9 @@ def create_keypair(gpg, pubname, privname, passwd, output_dir, verbose):
 
 def setup(gpg, threshold, nshares, output_dir, verbose=False):
     passwd = create_password(128, verbose)
-    create_shares(passwd, threshold, nshares, output_dir, verbose)
     create_keypair(gpg, 'encrypt', 'decrypt', passwd, output_dir, verbose)
     create_keypair(gpg, 'verify' , 'sign'   , None  , output_dir, verbose)
+    create_shares(gpg, passwd, threshold, nshares, output_dir, verbose)
 
 ###########
 # encrypt #
@@ -139,17 +143,17 @@ def encrypt(gpg, encrypt_key, sign_key, before, after, verbose):
 # verify #
 ##########
 
-def verify(gpg, verify_key, signed_file, signature_file, verbose):
+def verify(gpg, verify_key, signed_file, verbose):
     import_key(gpg, verify_key, verbose)
     if verbose:
         print 'verifying %s with %s' % (signed_file, verify_key)
+    signature_file = signed_file + '.sig'
     with open(signature_file, 'rb') as f:
         success = gpg.verify_file(f, data_filename=signed_file)
     if success:
         print 'verified signature for %s' % basename(signed_file)
     else:
-        print 'error! failed to verify %s' % basename(signed_file)
-        raise SystemExit(1)
+        raise SystemExit('error! failed to verify %s' % basename(signed_file))
 
 ###########
 # decrypt #
@@ -162,6 +166,7 @@ def recreate_password(threshold, share_paths, stego_pass, verbose):
     shares = ''
     for path in share_paths:
         # unhide any hidden shares first
+        # TODO do this earlier, and as a separate fn that can be part of verify too
         if not path.endswith('.key'): # TODO use char count instead?
             unhidden = mktemp() # TODO figure out how to do this in a context or auto-delete after
             unhide(path, unhidden, stego_pass, verbose)
@@ -214,11 +219,10 @@ def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
     if outfile.endswith('.tar'):
         untar(outfile, verbose)
 
-def decrypt(gpg, decrypt_key, secretfile, outfile, passwd, verbose,
-            verify_key=None, signature_file=None):
+def decrypt(gpg, decrypt_key, secretfile, outfile, passwd, verbose, verify_key=None):
     if verify_key:
         # TODO abort on failure?
-        verify(gpg, verify_key, secretfile, signature_file, verbose)
+        verify(gpg, verify_key, secretfile, verbose)
     decrypt_file(gpg, decrypt_key, secretfile, passwd, outfile, verbose)
 
 ########
@@ -264,14 +268,14 @@ def find_files(working_dir):
     files = glob(join(working_dir, '*'))
     filters = {
         'secret'      : '.*\\.gpg$',
-        'sigfile'     : '.*\\.gpg\\.sig$',
         'verify_key'  : '.*verify\\.key$',
         'decrypt_key' : '.*decrypt\\.key$',
         'shares'      : '.*share-[0-9]*\\.[-.]*'
     }
     matches = {}
     for key in filters:
-        matches[key] = [f for f in files if match(filters[key], f)]
+        matches[key] = sorted(f for f in files if match(filters[key], f))
+    matches['shares'] = sorted(s for s in matches['shares'] if not s.endswith('.sig'))
     return matches
 
 def auto_verify(gpg, working_dir, verbose):
@@ -279,14 +283,10 @@ def auto_verify(gpg, working_dir, verbose):
     if len(files['verify_key']) == 0: print 'verify key not found'
     if len(files['verify_key']) >  1: print 'found multiple verify keys'
     if len(files['secret'    ]) == 0: print 'secret file not found'
-    if len(files['sigfile'   ]) == 0: print 'signature file not found'
-    if len(files['secret']) != len(files['sigfile']):
-        print 'found different number of secret files from signatures'
     key = files['verify_key'][0]
-    secrets  = sorted(files['secret'])
-    sigfiles = sorted(files['sigfile'])
-    for (secret, sigfile) in zip(secrets, sigfiles):
-        verify(gpg, key, secret, sigfile, verbose)
+    secrets = sorted(files['secret'])
+    for signed_file in files['secret'] + files['shares']:
+        verify(gpg, key, signed_file, verbose)
 
 ################
 # auto-decrypt #
@@ -328,18 +328,15 @@ def main(args):
         shares    = int(args['<shares>'])
         setup(gpg, threshold, shares, output_dir, verbose)
 
-    # TODO automatically use sha256sum passphrase on any stego files
     elif args['decrypt']:
         decrypt_key = args['<decrypt-key>']
         verify_key  = args['<verify-key>']
         secret      = args['<locked-file>']
-        sigfile     = args['<sig-file>']
         outfile     = args['<output-path>']
         shares      = args['<share>']
         stego_pass  = sha256sum(decrypt_key, verbose)
         master_pass = auto_recreate_password(shares, stego_pass, verbose)
-        decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose,
-                verify_key, sigfile)
+        decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose, verify_key)
 
     elif args['encrypt']:
         sign_key    = args['<sign-key>']
@@ -351,8 +348,7 @@ def main(args):
     elif args['verify']:
         verify_key = args['<verify-key>']
         secret     = args['<locked-file>']
-        sigfile    = args['<sig-file>']
-        verify(gpg, verify_key, secret, sigfile, verbose)
+        verify(gpg, verify_key, secret, verbose)
 
     elif args['hide']:
         decrypt_key  = args['<decrypt_key>']
