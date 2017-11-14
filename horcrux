@@ -11,8 +11,8 @@ Usage:
   horcrux [-v] encrypt <encrypt-key> <sign-key> <file-to-encrypt> <output-path>
   horcrux [-v] verify  <verify-key> <locked-file> <sig-file>
   horcrux [-v] decrypt <decrypt-key> <verify-key> <locked-file> <sig-file> <output-path> <share>...
-  horcrux [-v] hide    <file-to-hide> <cover-file> <output-path> [<passphrase>]
-  horcrux [-v] unhide  <stego-file> <output-path> [<passphrase>]
+  horcrux [-v] hide    <decrypt_key> <file-to-hide> <cover-file> <output-path>
+  horcrux [-v] unhide  <decrypt_key> <stego-file> <output-path>
 
 Options:
   -h --help     Show this text.
@@ -155,7 +155,7 @@ def verify(gpg, verify_key, signed_file, signature_file, verbose):
 # decrypt #
 ###########
 
-def recreate_password(threshold, share_paths, verbose):
+def recreate_password(threshold, share_paths, stego_pass, verbose):
     if verbose:
         print 'trying to reconstruct password from %d shares...' % threshold,
     cmd = ['ssss-combine', '-t', str(threshold)]
@@ -164,7 +164,7 @@ def recreate_password(threshold, share_paths, verbose):
         # unhide any hidden shares first
         if not path.endswith('.key'): # TODO use char count instead?
             unhidden = mktemp() # TODO figure out how to do this in a context or auto-delete after
-            unhide(path, unhidden, verbose, passphrase=None)
+            unhide(path, unhidden, stego_pass, verbose)
             path = unhidden
         with open(path, 'r') as f:
             shares += f.read()
@@ -180,14 +180,11 @@ def recreate_password(threshold, share_paths, verbose):
         raise SystemExit(1)
     return passwd
 
-def auto_recreate_password(share_paths, verbose):
-    # put the ones with no password first to save typing it over and over
+def auto_recreate_password(share_paths, stego_pass, verbose):
     # TODO how to avoid failure if duplicates? (.key and .jpeg for example)
-    share_paths = [f for f in share_paths if     f.endswith('.key')] \
-                + [f for f in share_paths if not f.endswith('.key')]
     for n in range(1, len(share_paths)+1):
         try:
-            return recreate_password(n, share_paths[:n], verbose)
+            return recreate_password(n, share_paths[:n], stego_pass, verbose)
         except:
             # raise
             continue
@@ -196,8 +193,7 @@ def auto_recreate_password(share_paths, verbose):
 
 def untar(tarfile, verbose):
     outdir = tarfile.split('.tar')[0]
-    if verbose:
-        print 'extracting %s to %s' % (tarfile, outdir)
+    print 'extracting %s to %s:' % (tarfile, outdir)
     cmd = ['tar', 'xv', '-f', tarfile, '--one-top-level=%s' % outdir]
     check_call(cmd)
 
@@ -216,22 +212,23 @@ def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
     if outfile.endswith('.tar'):
         untar(outfile, verbose)
 
-def decrypt(gpg, decrypt_key, secretfile, outfile, verbose,
-            verify_key=None, signature_file=None, passwd=None, shares=[]):
+def decrypt(gpg, decrypt_key, secretfile, outfile, passwd, verbose,
+            verify_key=None, signature_file=None):
     if verify_key:
         # TODO abort on failure?
         verify(gpg, verify_key, secretfile, signature_file, verbose)
-    if passwd is None and len(shares) > 0:
-        passwd = auto_recreate_password(shares, verbose)
-    elif passwd is None:
-        print 'no password or password shares given'
-        raise SystemExit(1)
-    # TODO how to fail here if neither shares nor passwd?
     decrypt_file(gpg, decrypt_key, secretfile, passwd, outfile, verbose)
 
 ########
 # hide #
 ########
+
+def sha256sum(filename, verbose):
+    if verbose:
+        print 'calculating sha256sum of %s' % filename
+    cmd = ['sha256sum', filename]
+    sha = check_output(cmd).split()[0]
+    return sha
 
 def hide(file_to_hide, cover_file, outfile, passphrase, verbose):
     if verbose:
@@ -245,14 +242,13 @@ def hide(file_to_hide, cover_file, outfile, passphrase, verbose):
 # unhide #
 ##########
 
-def unhide(stego_file, outfile, verbose, passphrase=None):
-    # need to say which file when prompting for passphrase
-    if passphrase is None or verbose:
-        print 'extracting %s from %s' % (outfile, stego_file)
-    cmd = ['steghide', 'extract', '-sf', stego_file, '-xf', outfile]
-    if passphrase:
-        # otherwise steghide will prompt for it
-        cmd += ['-p', passphrase]
+def unhide(stego_file, outfile, passphrase, verbose):
+    if verbose:
+        print 'extracting %s from %s...' % (outfile, stego_file),
+    cmd = ['steghide', 'extract', '-sf', stego_file,
+           '-xf', outfile, '-p', passphrase]
+    if not verbose:
+        cmd.append('--quiet')
     check_call(cmd)
 
 ###############
@@ -304,10 +300,11 @@ def auto_decrypt(gpg, working_dir, verbose):
     shares  = sorted(files['shares'])
     secrets = sorted(files['secret'])
     if len(shares) == 0: print 'no password shares found'
-    passwd = auto_recreate_password(shares, verbose)
+    stego_pass  = sha256sum(decrypt_key, verbose)
+    master_pass = auto_recreate_password(shares, stego_pass, verbose)
     for secret in files['secret']:
         outfile = splitext(secret)[0]
-        decrypt(gpg, decrypt_key, secret, outfile, verbose, passwd=passwd)
+        decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose)
 
 ########
 # main #
@@ -329,6 +326,7 @@ def main(args):
         shares    = int(args['<shares>'])
         setup(gpg, threshold, shares, output_dir, verbose)
 
+    # TODO automatically use sha256sum passphrase on any stego files
     elif args['decrypt']:
         decrypt_key = args['<decrypt-key>']
         verify_key  = args['<verify-key>']
@@ -336,8 +334,10 @@ def main(args):
         sigfile     = args['<sig-file>']
         outfile     = args['<output-path>']
         shares      = args['<share>']
-        decrypt(gpg, decrypt_key, secret, outfile, verbose,
-                verify_key, sigfile, shares=shares)
+        stego_pass  = sha256sum(decrypt_key, verbose)
+        master_pass = auto_recreate_password(shares, stego_pass, verbose)
+        decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose,
+                verify_key, sigfile)
 
     elif args['encrypt']:
         sign_key    = args['<sign-key>']
@@ -353,17 +353,19 @@ def main(args):
         verify(gpg, verify_key, secret, sigfile, verbose)
 
     elif args['hide']:
+        decrypt_key  = args['<decrypt_key>']
         file_to_hide = args['<file-to-hide>']
         cover_file   = args['<cover-file>']
         outfile      = args['<output-path>']
-        passphrase   = args['<passphrase>']
-        hide(file_to_hide, cover_file, outfile, passphrase, verbose)
+        stego_pass   = sha256sum(decrypt_key, verbose)
+        hide(file_to_hide, cover_file, outfile, stego_pass, verbose)
 
     elif args['unhide']:
-        stego_file = args['<stego-file>']
-        outfile    = args['<output-path>']
-        passphrase = args['<passphrase>']
-        unhide(stego_file, outfile, verbose, passphrase)
+        decrypt_key = args['<decrypt_key>']
+        stego_file  = args['<stego-file>']
+        outfile     = args['<output-path>']
+        stego_pass  = sha256sum(decrypt_key, verbose)
+        unhide(stego_file, outfile, stego_pass, verbose)
 
     elif args['autoverify']:
         working_dir = args['<working-dir>']
