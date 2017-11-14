@@ -33,17 +33,15 @@ say "which is needed to get the decrypt key, which is needed to get the secret"
 run 'horcrux -v decrypt example/{decrypt.key,verify.key,secret.txt.gpg*,secret-decrypt-with-keys.txt,share-{01,04,05}.key}'
 
 say "optionally, you can hide keys in images or sound files"
-say "(that requires prompting for another password)"
-run "horcrux -v hide example/share-01.key example.jpeg example/share-01.jpeg greatpassphrase"
+run "horcrux -v hide example/decrypt.key example/share-01.key example.jpeg example/share-01.jpeg"
 
 say "the hidden files can be unhidden individually"
-run "horcrux -v unhide example/{share-01.jpeg,share-01-unhidden.key} greatpassphrase"
+run "horcrux -v unhide example/{decrypt.key,share-01.jpeg,share-01-unhidden.key}"
 
-say "or you will be prompted for the password during decrypt"
-say "(hint: it's greatpassphrase)"
+say "or it will be done automatically during decryption"
 run 'horcrux -v decrypt example/{decrypt.key,verify.key,secret.txt.gpg*,secret-decrypt-with-jpeg.txt,share-01.jpeg,share-{02,04}.key}'
 
-# wart: delete duplicate sharse because they mess up password reconstruction
+# wart: delete duplicate shares because they mess up password reconstruction
 #       (only a problem when mixing advanced cli args with autodecrypt)
 rm example/{*-unhidden.key,*.jpeg}
 
