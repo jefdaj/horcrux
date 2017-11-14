@@ -48,8 +48,9 @@ rm example/{*-unhidden.key,*.jpeg}
 say "autoverify and autodecrypt modes will look for files"
 say "in the given directory (default: .), making it possible"
 say "to launch horcrux by dropping a folder on the .desktop file"
-run "cd example && horcrux -v autodecrypt"
+run "horcrux autoverify example"
+run "horcrux -v autodecrypt example"
 
 say "final files:"
-run 'ls'
-run 'cat secret*.txt'
+run 'ls example'
+run 'cat example/secret*.txt'
