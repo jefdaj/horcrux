@@ -1,0 +1,369 @@
+#!/usr/bin/env python2
+
+'''
+Horcrux: signed, updatable secrets unlocked by N of M optionally hidden keys
+
+Usage:
+  horcrux  -h
+  horcrux [-v] autoverify  [<working-dir>]
+  horcrux [-v] autodecrypt [<working-dir>]
+  horcrux [-v] setup   <threshold> <shares> [<output-dir>]
+  horcrux [-v] encrypt <encrypt-key> <sign-key> <file-to-encrypt> <output-path>
+  horcrux [-v] verify  <verify-key> <locked-file> <sig-file>
+  horcrux [-v] decrypt <decrypt-key> <verify-key> <locked-file> <sig-file> <output-path> <share>...
+  horcrux [-v] hide    <file-to-hide> <cover-file> <output-path> [<passphrase>]
+  horcrux [-v] unhide  <stego-file> <output-path> [<passphrase>]
+
+Options:
+  -h --help     Show this text.
+  -v --verbose  Print a lot of messages.
+'''
+
+from docopt     import docopt
+from glob       import glob
+from gnupg      import GPG
+from os         import makedirs
+from os.path    import join, exists, splitext, abspath, dirname
+from re         import match
+from subprocess import check_call, check_output, Popen, PIPE
+from sys        import argv
+from tempfile   import mktemp, mkdtemp
+
+#########
+# setup #
+#########
+
+def create_password(nchars, verbose):
+    if verbose:
+        print "generating a master password, which won't be saved anywhere"
+    cmd = ['pwgen', '--secure', str(nchars), '1']
+    return check_output(cmd)
+
+def create_shares(passwd, threshold, nshares, output_dir, verbose):
+    if verbose:
+        msg = 'splitting the password into %d shares, any %d of which can reconstruct it'
+        print msg % (nshares, threshold)
+    # TODO -w token? -x (hex mode)? small or variable-length strings instead of 1024?
+    cmd = ['ssss-split', '-t', str(threshold), '-n', str(nshares), '-s', '1024']
+    proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    (out, err) = proc.communicate(passwd)
+    shares = out.split('\n')[1:-1]
+    assert len(shares) == nshares
+    for n in range(1, nshares+1):
+        path = join(output_dir, 'share-%.2d.key' % n)
+        if verbose:
+            print 'writing share %d to %s' % (n, path)
+        share = shares[n-1]
+        assert len(share) == 258 # TODO not needed if we test round trip later?
+        with open(path, 'w') as f:
+            f.write('%s\n' % share)
+
+def create_keyring(home, verbose):
+    if verbose:
+        print 'creating temporary gpg instance with homedir %s' % home
+    with open(join(home, 'gpg-agent.conf'), 'w') as f:
+        f.write('allow-loopback-pinentry\n')
+    return GPG(gnupghome=home, use_agent=False) # TODO use_agent? keyring?
+
+def create_keypair(gpg, pubname, privname, passwd, output_dir, verbose):
+    pubfile   = join(output_dir, pubname  + '.key')
+    privfile  = join(output_dir, privname + '.key')
+    bothnames = pubname + '/' + privname
+    if verbose:
+        print 'creating %s keypair' % bothnames
+    params = {
+        'key_type'   : 'RSA',
+        'key_length' : 4096,
+        'name_real'  : bothnames,
+        'name_email' : privname # TODO gotta be a better way right? key id?
+    }
+    if passwd:
+        params['passphrase'] = passwd
+    gpg.gen_key(gpg.gen_key_input(**params))
+    [pubname, privname] = bothnames.split('/')
+    pubfile  = join(output_dir, pubname  + '.key')
+    privfile = join(output_dir, privname + '.key')
+    if verbose:
+        print 'writing %s' % pubfile
+    with open(pubfile, 'w') as f:
+        f.write(gpg.export_keys(pubname, False))
+    if verbose:
+        print 'writing %s' % privfile
+    with open(privfile, 'w') as f:
+        f.write(gpg.export_keys(privname, True))
+
+def setup(gpg, threshold, nshares, output_dir, verbose=False):
+    passwd = create_password(128, verbose)
+    create_shares(passwd, threshold, nshares, output_dir, verbose)
+    create_keypair(gpg, 'encrypt', 'decrypt', passwd, output_dir, verbose)
+    create_keypair(gpg, 'verify' , 'sign'   , None  , output_dir, verbose)
+
+###########
+# encrypt #
+###########
+
+def import_key(gpg, filename, verbose, passwd=None):
+    if verbose:
+        print 'importing gpg key %s' % filename
+    with open(filename, 'rb') as f:
+        gpg.import_keys(f.read())
+
+def encrypt_file(gpg, recipient, before_path, after_path, verbose):
+    if verbose:
+        print 'encrypting %s to "%s" (output in %s)' \
+               % (before_path, recipient, after_path)
+    with open(before_path, 'rb') as f:
+        status = gpg.encrypt_file(f, recipients=[recipient],
+                                  output=after_path, always_trust=True)
+    if not status.ok:
+        print status.status
+        print status.stderr
+        raise SystemExit(1)
+
+def sign_file(gpg, keyname, file_to_sign, verbose):
+    outfile = file_to_sign + '.sig' # TODO take an optional argument for this?
+    if verbose:
+        print 'signing %s with "%s" key (output in %s)' % (file_to_sign, keyname, outfile)
+    with open(file_to_sign, 'r') as f:
+        signed = gpg.sign_file(f, keyid=keyname, detach=True)
+    with open(outfile, 'wb') as f:
+        f.write(signed.data)
+
+def encrypt(gpg, encrypt_key, sign_key, before, after, verbose):
+    import_key(gpg, encrypt_key, verbose)
+    import_key(gpg, sign_key  , verbose)
+    encrypt_file(gpg, 'encrypt', before, after, verbose)
+    sign_file(gpg, 'verify', after, verbose)
+
+##########
+# verify #
+##########
+
+def verify(gpg, verify_key, signed_file, signature_file, verbose):
+    import_key(gpg, verify_key, verbose)
+    if verbose:
+        print 'verifying %s with %s' % (signed_file, verify_key)
+    with open(signature_file, 'rb') as f:
+        success = gpg.verify_file(f, data_filename=signed_file)
+    if success:
+        print 'verified signature for %s' % signed_file
+    else:
+        print 'error! failed to verify %s' % signed_file
+        raise SystemExit(1)
+
+###########
+# decrypt #
+###########
+
+def recreate_password(threshold, share_paths, verbose):
+    if verbose:
+        print 'trying to reconstruct password from %d shares...' % threshold,
+    cmd = ['ssss-combine', '-t', str(threshold)]
+    shares = ''
+    for path in share_paths:
+        # unhide any hidden shares first
+        if not path.endswith('.key'): # TODO use char count instead?
+            unhidden = mktemp() # TODO figure out how to do this in a context or auto-delete after
+            unhide(path, unhidden, verbose, passphrase=None)
+            path = unhidden
+        with open(path, 'r') as f:
+            shares += f.read()
+    proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    (out, err) = proc.communicate(shares)
+    passwd = err.split(':')[1].strip()
+    if len(passwd) == 128:
+        if verbose:
+            print 'success!'
+    else:
+        if verbose:
+            print 'fail'
+        raise SystemExit(1)
+    return passwd
+
+def auto_recreate_password(share_paths, verbose):
+    # put the ones with no password first to save typing it over and over
+    # TODO how to avoid failure if duplicates? (.key and .jpeg for example)
+    share_paths = [f for f in share_paths if     f.endswith('.key')] \
+                + [f for f in share_paths if not f.endswith('.key')]
+    for n in range(1, len(share_paths)+1):
+        try:
+            return recreate_password(n, share_paths[:n], verbose)
+        except:
+            # raise
+            continue
+    print 'failed to reconstruct password'
+    raise SystemExit(1)
+
+def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
+    if verbose:
+        msg = 'decrypting %s with %s and the password (output in %s)'
+        print msg % (secretfile, decrypt_key, outfile)
+    import_key(gpg, decrypt_key, verbose)
+    with open(secretfile, 'rb') as f:
+        status = gpg.decrypt_file(f, passphrase=password, output=outfile)
+    if not status.ok:
+        print status.status
+        print status.stderr
+        raise SystemExit(1)
+    print 'decrypted %s to %s' % (secretfile, outfile)
+
+def decrypt(gpg, decrypt_key, secretfile, outfile, verbose,
+            verify_key=None, signature_file=None, passwd=None, shares=[]):
+    if verify_key:
+        # TODO abort on failure?
+        verify(gpg, verify_key, secretfile, signature_file, verbose)
+    if passwd is None and len(shares) > 0:
+        passwd = auto_recreate_password(shares, verbose)
+    elif passwd is None:
+        print 'no password or password shares given'
+        raise SystemExit(1)
+    # TODO how to fail here if neither shares nor passwd?
+    decrypt_file(gpg, decrypt_key, secretfile, passwd, outfile, verbose)
+
+########
+# hide #
+########
+
+def hide(file_to_hide, cover_file, outfile, passphrase, verbose):
+    if verbose:
+        print 'hiding %s in %s (output in %s)' % (file_to_hide, cover_file, outfile)
+    # TODO quote passphrase?
+    cmd = ['steghide', 'embed', '-ef', file_to_hide, '-cf', cover_file,
+           '-sf', outfile, '-p', passphrase]
+    check_call(cmd)
+
+##########
+# unhide #
+##########
+
+def unhide(stego_file, outfile, verbose, passphrase=None):
+    # need to say which file when prompting for passphrase
+    if passphrase is None or verbose:
+        print 'extracting %s from %s' % (outfile, stego_file)
+    cmd = ['steghide', 'extract', '-sf', stego_file, '-xf', outfile]
+    if passphrase:
+        # otherwise steghide will prompt for it
+        cmd += ['-p', passphrase]
+    check_call(cmd)
+
+###############
+# auto-verify #
+###############
+
+def find_files(working_dir):
+    # TODO be more intelligent about names? this fails if they're at all tricky
+    if not working_dir:
+        working_dir = '.'
+    files = glob(join(working_dir, '*'))
+    filters = {
+        'secret'      : '.*\\.gpg$',
+        'sigfile'     : '.*\\.gpg\\.sig$',
+        'verify_key'  : '.*verify\\.key$',
+        'decrypt_key' : '.*decrypt\\.key$',
+        'shares'      : '.*share-[0-9]*\\.[-.]*'
+    }
+    matches = {}
+    for key in filters:
+        matches[key] = [f for f in files if match(filters[key], f)]
+    return matches
+
+def auto_verify(gpg, working_dir, verbose):
+    files = find_files(working_dir)
+    if len(files['verify_key']) == 0: print 'verify key not found'
+    if len(files['verify_key']) >  1: print 'found multiple verify keys'
+    if len(files['secret'    ]) == 0: print 'secret file not found'
+    if len(files['sigfile'   ]) == 0: print 'signature file not found'
+    if len(files['secret']) != len(files['sigfile']):
+        print 'found different number of secret files from signatures'
+    key = files['verify_key'][0]
+    secrets  = sorted(files['secret'])
+    sigfiles = sorted(files['sigfile'])
+    for (secret, sigfile) in zip(secrets, sigfiles):
+        verify(gpg, key, secret, sigfile, verbose)
+
+################
+# auto-decrypt #
+################
+
+def auto_decrypt(gpg, working_dir, verbose):
+    auto_verify(gpg, working_dir, verbose)
+    files = find_files(working_dir)
+    if len(files['decrypt_key']) == 0: print 'decrypt key not found'
+    if len(files['decrypt_key'])  > 1: print 'multiple decrypt keys found'
+    if len(files['secret'     ]) == 0: print 'no secret files found'
+    decrypt_key = files['decrypt_key'][0]
+    shares  = sorted(files['shares'])
+    secrets = sorted(files['secret'])
+    if len(shares) == 0: print 'no password shares found'
+    passwd = auto_recreate_password(shares, verbose)
+    for secret in files['secret']:
+        outfile = splitext(secret)[0]
+        decrypt(gpg, decrypt_key, secret, outfile, verbose, passwd=passwd)
+
+########
+# main #
+########
+
+def main(args):
+    verbose = bool(args['--verbose'])
+    # with tempfile.TemporaryDirectory() as home:
+    home = mkdtemp() # TODO use a context or handle exceptions
+    gpg = create_keyring(home, verbose)
+
+    if args['setup']:
+        output_dir = args['<output-dir>']
+        if not output_dir:
+            output_dir = '.'
+        if not exists(output_dir):
+            makedirs(output_dir)
+        threshold = int(args['<threshold>'])
+        shares    = int(args['<shares>'])
+        setup(gpg, threshold, shares, output_dir, verbose)
+
+    elif args['decrypt']:
+        decrypt_key = args['<decrypt-key>']
+        verify_key  = args['<verify-key>']
+        secret      = args['<locked-file>']
+        sigfile     = args['<sig-file>']
+        outfile     = args['<output-path>']
+        shares      = args['<share>']
+        decrypt(gpg, decrypt_key, secret, outfile, verbose,
+                verify_key, sigfile, shares=shares)
+
+    elif args['encrypt']:
+        sign_key    = args['<sign-key>']
+        encrypt_key = args['<encrypt-key>']
+        before      = args['<file-to-encrypt>']
+        after       = args['<output-path>']
+        encrypt(gpg, encrypt_key, sign_key, before, after, verbose)
+
+    elif args['verify']:
+        verify_key = args['<verify-key>']
+        secret     = args['<locked-file>']
+        sigfile    = args['<sig-file>']
+        verify(gpg, verify_key, secret, sigfile, verbose)
+
+    elif args['hide']:
+        file_to_hide = args['<file-to-hide>']
+        cover_file   = args['<cover-file>']
+        outfile      = args['<output-path>']
+        passphrase   = args['<passphrase>']
+        hide(file_to_hide, cover_file, outfile, passphrase, verbose)
+
+    elif args['unhide']:
+        stego_file = args['<stego-file>']
+        outfile    = args['<output-path>']
+        passphrase = args['<passphrase>']
+        unhide(stego_file, outfile, verbose, passphrase)
+
+    elif args['autoverify']:
+        working_dir = args['<working-dir>']
+        auto_verify(gpg, working_dir, verbose)
+
+    elif args['autodecrypt']:
+        working_dir = args['<working-dir>']
+        auto_decrypt(gpg, working_dir, verbose)
+
+if __name__ == '__main__':
+    args = docopt(__doc__)
+    main(args)
