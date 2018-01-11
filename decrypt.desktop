@@ -2,7 +2,7 @@
 Version=1.0
 Name=decrypt
 Comment=signed, updatable secrets read with N of M optionally hidden keys
-Exec=gnome-terminal -e 'bash -c "sudo /live/persistence/TailsData_unlocked/Persistent/horcrux/horcrux -v autodecrypt %f; read -n1"'
+Exec=gnome-terminal -e 'bash -c "sudo /live/persistence/TailsData_unlocked/horcrux/horcrux -v autodecrypt %f; read -n1"'
 Icon=utilities-terminal
 Terminal=false
 Type=Application
