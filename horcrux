@@ -148,6 +148,8 @@ def verify(gpg, verify_key, signed_file, verbose):
     if verbose:
         print 'verifying %s with %s' % (signed_file, verify_key)
     signature_file = signed_file + '.sig'
+    if not exists(signature_file):
+        raise SystemExit('error! missing signature %s' % signature_file)
     with open(signature_file, 'rb') as f:
         success = gpg.verify_file(f, data_filename=signed_file)
     if success:
@@ -209,7 +211,7 @@ def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
         print status.status
         print status.stderr
         raise SystemExit(1)
-    print 'decrypted %s to %s' % (basename(secretfile), basename(outfile))
+    print 'decrypted %s' % basename(outfile)
     if outfile.endswith('.tar'):
         untar(outfile, verbose)
 
@@ -244,7 +246,7 @@ def hide(file_to_hide, cover_file, outfile, passphrase, verbose):
 
 def unhide(stego_file, outfile, passphrase, verbose):
     if verbose:
-        print 'extracting %s from %s...' % (basename(outfile), basename(stego_file)),
+        print 'extracting %s to %s' % (basename(stego_file), outfile)
     cmd = ['steghide', 'extract', '-sf', stego_file,
            '-xf', outfile, '-p', passphrase]
     if not verbose:
@@ -258,7 +260,7 @@ def unhide_any(gpg, shares, passphrase, verbose):
     unhidden = []
     for n in range(len(hidden)):
         stego_file = hidden[n]
-        tmpfile    = mktemp()
+        tmpfile    = mktemp(suffix='.key')
         unhide(stego_file, tmpfile, passphrase, verbose)
         unhidden.append(tmpfile)
     return sorted(regular) + sorted(unhidden)
@@ -286,8 +288,8 @@ def find_files(working_dir):
 
 def auto_verify(gpg, working_dir, verbose):
     files = find_files(working_dir)
-    if len(files['verify_key']) == 0: print 'verify key not found'
-    if len(files['verify_key']) >  1: print 'found multiple verify keys'
+    if len(files['verify_key']) == 0: raise SystemExit('verify key not found')
+    if len(files['verify_key']) >  1: raise SystemExit('found multiple verify keys')
     if len(files['secret'    ]) == 0: print 'secret file not found'
     key = files['verify_key'][0]
     for signed_file in files['secret'] + files['shares']:
