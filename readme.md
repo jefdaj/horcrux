@@ -51,9 +51,9 @@ generate these files:
 
 * `update.key` for updating the will (keep this)
 * `sign.key` for signing the updated will (keep this)
-* `verify.key` for checking the signature (distribute this)
+* `verify.key` for checking the signature (keep + distribute this)
+* `decrypt.key` for decrypting (keep + distribute this; it's locked with the shares)
 * multiple `unlock-XX.key` shares for unlocking the will (distibute and/or keep these)
-* `decrypt.key` for decrypting (distribute this; it's locked with the shares)
 
 Examples
 --------
@@ -68,6 +68,7 @@ TODO
 * Use rng-tools?
 * Put all tmpfiles in RAM (/tmp? /run? /run/user/1000?)
 * Add a second layer of encryption with openssl?
+* asciinema demo videos
 
 [1]: https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing
 [2]: https://tails.boum.org/
