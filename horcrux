@@ -10,6 +10,7 @@ Usage:
   horcrux [-v] autoverify  [<working-dir>]
   horcrux [-v] autodecrypt [<working-dir>]
   horcrux [-v] setup   <threshold> <shares> [<output-dir>]
+  horcrux [-v] sign    <sign-key> <file-to-sign>
   horcrux [-v] encrypt <encrypt-key> <sign-key> <file-to-encrypt> <output-path>
   horcrux [-v] verify  <verify-key> <locked-file>
   horcrux [-v] decrypt <decrypt-key> <verify-key> <locked-file> <output-path> <share>...
@@ -102,15 +103,32 @@ def setup(gpg, threshold, nshares, output_dir, verbose=False):
     create_keypair(gpg, 'verify' , 'sign'   , None  , output_dir, verbose)
     create_shares(gpg, passwd, threshold, nshares, output_dir, verbose)
 
-###########
-# encrypt #
-###########
+########
+# sign #
+########
 
 def import_key(gpg, filename, verbose, passwd=None):
     if verbose:
         print 'importing gpg key %s' % filename
     with open(filename, 'rb') as f:
         gpg.import_keys(f.read())
+
+def sign_file(gpg, keyname, file_to_sign, verbose):
+    outfile = file_to_sign + '.sig' # TODO take an optional argument for this?
+    if verbose:
+        print 'signing %s with "%s" key (output in %s)' % (file_to_sign, keyname, outfile)
+    with open(file_to_sign, 'r') as f:
+        signed = gpg.sign_file(f, keyid=keyname, detach=True)
+    with open(outfile, 'wb') as f:
+        f.write(signed.data)
+
+def sign(gpg, sign_key, file_to_sign, verbose):
+    import_key(gpg, sign_key, verbose)
+    sign_file(gpg, 'verify', file_to_sign, verbose)
+
+###########
+# encrypt #
+###########
 
 def encrypt_file(gpg, recipient, before_path, after_path, verbose):
     if verbose:
@@ -123,15 +141,6 @@ def encrypt_file(gpg, recipient, before_path, after_path, verbose):
         print status.status
         print status.stderr
         raise SystemExit(1)
-
-def sign_file(gpg, keyname, file_to_sign, verbose):
-    outfile = file_to_sign + '.sig' # TODO take an optional argument for this?
-    if verbose:
-        print 'signing %s with "%s" key (output in %s)' % (file_to_sign, keyname, outfile)
-    with open(file_to_sign, 'r') as f:
-        signed = gpg.sign_file(f, keyid=keyname, detach=True)
-    with open(outfile, 'wb') as f:
-        f.write(signed.data)
 
 def encrypt(gpg, encrypt_key, sign_key, before, after, verbose):
     import_key(gpg, encrypt_key, verbose)
@@ -354,6 +363,11 @@ def main(args):
         shares      = unhide_any(gpg, shares, stego_pass, verbose)
         master_pass = auto_recreate_password(shares, stego_pass, verbose)
         decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose, verify_key)
+
+    elif args['sign']:
+        sign_key     = args['<sign-key>']
+        file_to_sign = args['<file-to-sign>']
+        sign(gpg, sign_key, file_to_sign, verbose)
 
     elif args['encrypt']:
         sign_key    = args['<sign-key>']
