@@ -13,8 +13,8 @@ Usage:
   horcrux [-v] encrypt <encrypt-key> <sign-key> <file-to-encrypt> <output-path>
   horcrux [-v] verify  <verify-key> <locked-file>
   horcrux [-v] decrypt <decrypt-key> <verify-key> <locked-file> <output-path> <share>...
-  horcrux [-v] hide    <decrypt_key> <file-to-hide> <cover-file> <output-path>
-  horcrux [-v] unhide  <decrypt_key> <stego-file> <output-path>
+  horcrux [-v] hide    <decrypt-key> <file-to-hide> <cover-file> <output-path>
+  horcrux [-v] unhide  <decrypt-key> <stego-file> <output-path>
 
 Options:
   -h --help     Show this text.
@@ -368,7 +368,7 @@ def main(args):
         verify(gpg, verify_key, secret, verbose)
 
     elif args['hide']:
-        decrypt_key  = args['<decrypt_key>']
+        decrypt_key  = args['<decrypt-key>']
         file_to_hide = args['<file-to-hide>']
         cover_file   = args['<cover-file>']
         outfile      = args['<output-path>']
@@ -376,7 +376,7 @@ def main(args):
         hide(file_to_hide, cover_file, outfile, stego_pass, verbose)
 
     elif args['unhide']:
-        decrypt_key = args['<decrypt_key>']
+        decrypt_key = args['<decrypt-key>']
         stego_file  = args['<stego-file>']
         outfile     = args['<output-path>']
         stego_pass  = sha256sum(decrypt_key, verbose)
