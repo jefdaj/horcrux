@@ -147,10 +147,15 @@ def verify(gpg, verify_key, signed_file, verbose):
     import_key(gpg, verify_key, verbose)
     if verbose:
         print 'verifying %s with %s' % (signed_file, verify_key)
-    signature_file = signed_file + '.sig'
-    if not exists(signature_file):
-        raise SystemExit('error! missing signature %s' % signature_file)
-    with open(signature_file, 'rb') as f:
+    sig_file = signed_file + '.sig'
+    asc_file = signed_file + '.asc'
+    if exists(sig_file):
+        signature = sig_file
+    elif exists(asc_file):
+        signature = asc_file
+    else:
+        raise SystemExit('error! missing signature for %s' % signed_file)
+    with open(signature, 'rb') as f:
         success = gpg.verify_file(f, data_filename=signed_file)
     if success:
         print 'verified signature for %s' % basename(signed_file)
@@ -278,12 +283,14 @@ def find_files(working_dir):
         'secret'      : '.*\\.gpg$',
         'verify_key'  : '.*verify\\.key$',
         'decrypt_key' : '.*decrypt\\.key$',
-        'shares'      : '.*share-[0-9]*\\.[-.]*'
+        'shares'      : '.*share-[0-9]*\\.[-.]*',
+        'signatures'  : '.*\\.(sig|asc)$'
     }
     matches = {}
     for key in filters:
         matches[key] = sorted(f for f in files if match(filters[key], f))
     matches['shares'] = sorted(s for s in matches['shares'] if not s.endswith('.sig'))
+    matches['signed'] = sorted(splitext(s)[0] for s in matches['signatures'])
     return matches
 
 def auto_verify(gpg, working_dir, verbose):
@@ -292,7 +299,8 @@ def auto_verify(gpg, working_dir, verbose):
     if len(files['verify_key']) >  1: raise SystemExit('found multiple verify keys')
     if len(files['secret'    ]) == 0: print 'secret file not found'
     key = files['verify_key'][0]
-    for signed_file in files['secret'] + files['shares']:
+    signed_files = sorted(set(files['secret'] + files['shares'] + files['signed']))
+    for signed_file in signed_files:
         verify(gpg, key, signed_file, verbose)
 
 ################
