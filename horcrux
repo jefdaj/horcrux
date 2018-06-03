@@ -292,7 +292,7 @@ def find_files(working_dir):
         'secret'      : '.*\\.gpg$',
         'verify_key'  : '.*verify\\.key$',
         'decrypt_key' : '.*decrypt\\.key$',
-        'shares'      : '.*share-[0-9]*\\.[-.]*',
+        'shares'      : '.*share*\\.key$',
         'signatures'  : '.*\\.(sig|asc)$'
     }
     matches = {}
