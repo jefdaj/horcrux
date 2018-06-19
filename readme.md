@@ -20,10 +20,11 @@ this page to get started.
 I'm just a normal person. Why do I need that?
 ---------------------------------------------
 
-It sounds like overkill, but there really is no better way!
-Most people need something like this but don't know it yet.
+It sounds like overkill, but there really is no better way! My opinion is that
+most normal people will eventually discover a need for something like this as
+their lives come to depend more and more on passwords.
 
-Storing digital secrets is tricky because two bad things could happen:
+The problem is that storing digital secrets is tricky because two bad things could happen:
 
 1. you lose your secret
 2. someone steals your secret
@@ -31,9 +32,10 @@ Storing digital secrets is tricky because two bad things could happen:
 Both are pretty bad if the secret is your master password or some cryptocurrency.
 And what's worse, being safer from one generally makes you more vulnerable to the other...
 Wrote your password on paper? Someone might read it.
-Carefully memorized a long mneumonic passphrase? You might hit your head and forget it.
+Carefully memorized a long mneumonic passphrase?
+You might hit your head and forget it, or you might be in a coma.
 
-_This scheme is the simplest, most effective way to protect against both at once._
+_This scheme is the simplest, most effective way to protect against both risks at once._
 
 It also lets you pick how worried you are about each:
 use higher `N` (keys needed to decrypt) if you worry more about theft,
@@ -46,35 +48,35 @@ being physically robbed, or (much more likely) losing money on impulsive crypto 
 How does it work?
 -----------------
 
-All the keys are made with one command, like `horcrux setup my-first-horcrux 3 5` (3 of 5 shares
-to unlock). What it does is:
+All the keys are made with one command, like `horcrux setup my-first-horcruxes 3 5`.
+What it does is:
 
-1. Generate a random master password and break it into shares using
-   [Shamir's secret sharing scheme][3].
+1. Generate a random master password and break it into 5 shares using
+   [Shamir's secret sharing scheme][3], with 3 of the 5 required to reconstruct it.
 
 2. Generate an encrypt/decrypt [GPG keypair][4] and encrypt the private (decrypt)
    key with the master password.
 
 3. Generate a separate sign/verify GPG keypair for signature checking.
 
-These files are created in the `my-first-horcrux` directory:
+These files are created in the `my-first-horcruxes` directory:
 
 * `encrypt.key` for encrypting secrets (keep this)
 * `sign.key` for signing secrets (keep this)
-* `verify.key` for checking the signature (keep + distribute this)
+* `verify.key` for checking signatures (keep + distribute this)
 * `decrypt.key` for decrypting (keep + distribute this; it's locked with the shares)
-* 5 `horcrux-XX.key` shares for unlocking secrets (distibute and/or keep these)
+* 5 `horcrux-XX.key` master password shares (distibute and/or keep in separate locations)
 
 Now all you have to do is distribute them, encrypt some stuff,
 and test that you really can bring any 3 horcruxes together to decrypt!
 
-There are also a couple extra commands to help with distribution: `hide` to
-hide a horcrux in a photo or audio file, `unhide` to get them back, and `qrcode`
-to generate a QR code of it, suitable for printing.
+There are also some extra commands to help with distribution: `hide` to hide a
+horcrux in a photo or audio file, `unhide` to get it back, and `qrcode` to
+generate a QR code of it, suitable for printing.
 
-When you encrypt something with Horcrux it automatically signs it with
+When you encrypt something with Horcrux it automatically signs it with your
 `sign.key`. That way when you distribute it to friends or family they can use
-`verify.key` to check that the file is correct (not from someone else or
+`verify.key` to check that the file is correct (actually from you and not
 corrupted during transfer), even though they can't open it.
 
 
@@ -103,8 +105,8 @@ want to protect something important, like cryptocurrency or highly sensitive doc
 Computers get hacked all the time! The other two are optional.
 
 
-How to install it?
-------------------
+TAILS install
+-------------
 
 Horcrux should work anywhere you can install the following apt dependencies or
 their equivalents:
@@ -115,14 +117,15 @@ their equivalents:
 * python-docopt
 * python-gnupg
 * ssss
-* steghide
+* steghide (optional, for hide and unhide)
+* qrencode (optional, for QR codes)
 
 You need root access for steghide, but only if you want to hide horcruxes in
 images or audio files.
 
 I recommend doing everything in TAILS because it's portable, relatively simple
 to set up, leaves no trace of your keys on disk, and will work on a different
-computer later. You'll need to:
+computer in the future. You'll need to:
 
 1. Download and install TAILS on a USB drive,
    enable persistent storage with apt cache, and reboot.
@@ -142,10 +145,24 @@ You can also repeat these steps to make a "Horcrux live USB" for friends and
 family. Copy the `verify.desktop` and `decrypt.desktop` launchers into their
 `~/Persistent` so they can drag the backup folder onto them to verify and/or
 decrypt the backups, depending which keys you give them. Of course, you can
-give them just the share itself if you plan to be around to decrypt it.
+give them just the horcrux itself if you plan to be around to decrypt it.
+
+
+Qubes install
+=============
+
+Another good option for advanced users is [Qubes][5]. You shouldn't install it
+just for this, but if you use it already then a minimal offline VM (vault) is a
+reasonable place to keep the Horcrux program along with your sign, encrypt, and
+(locked) decrypt keys. Simply install the dependencies in the TemplateVM. This
+setup has the advantage of making it easier to horcrux-encrypt your files,
+because you don't need to reboot into TAILS each time. It may also work with
+[Qubes Split GPG][6], although I haven't tried.
 
 
 [1]: usage.txt
 [2]: example.log
 [3]: https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing
 [4]: https://www.gnupg.org
+[5]: https://www.qubes-os.org
+[6]: https://www.qubes-os.org/doc/split-gpg/
