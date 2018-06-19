@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Usage: sudo ./example.sh 2>&1 | tee example.log
 # TODO explicitly name all the files (.asc etc)
 
 set -e
