@@ -42,12 +42,17 @@ You might hit your head and forget it, or you might be in a coma.
 
 _This scheme is the simplest, most effective way to protect against both risks at once._
 
-It also lets you pick how worried you are about each:
-use higher `N` (keys needed to decrypt) if you worry more about theft,
-or higher `M` (keys total) if you worry more about losing access.
+It also has several other advantages:
 
-Finally, the time and effort needed to assemble the pieces offers some protection from
-being physically robbed, or (much more likely) losing money on impulsive crypto trades.
+* You can pick pick how worried you are about each:
+  use higher `N` (keys needed to decrypt) if you worry more about theft,
+  or higher `M` (keys total) if you worry more about losing access.
+
+* The time and effort needed to assemble the pieces offers some protection from
+  being physically robbed, or (much more likely) losing money on impulsive crypto trades.
+
+* It can be both a backup and a will. Distribute shares to family members
+  along with a `horcrux sign`ed document explaining what you want done when you die.
 
 
 How does it work?
@@ -91,7 +96,7 @@ Can I trust you?
 No. I mean, yes, but there's no way to prove that and you shouldn't rely on it.
 Instead you should take some common-sense security measures. In order of importance:
 
-1. Set it up in an isolated environment like TAILS (see below), make sure
+1. Set it up in an isolated environment like [TAILS][8] (see below), make sure
    everything works, then never connect it to the internet again after generating
    your keys.
 
@@ -129,7 +134,7 @@ their equivalents:
 You need root access for steghide, but only if you want to hide horcruxes in
 images or audio files.
 
-I recommend doing everything in TAILS because it's portable, relatively simple
+I recommend doing everything in [TAILS][8] because it's portable, relatively simple
 to set up, leaves no trace of your keys on disk, and will work on a different
 computer in the future. You'll need to:
 
@@ -185,3 +190,4 @@ Litecoin: MBBgdzToFS3aY2yrqu4F42RLvoo8iw6cNF
 [5]: https://www.gnupg.org
 [6]: https://www.qubes-os.org
 [7]: https://www.qubes-os.org/doc/split-gpg/
+[8]: https://tails.boum.org/
