@@ -1,7 +1,7 @@
 Horcrux: immortality for your encryption keys
 =============================================
 
-<img src="horcrux.png" width="500">
+<img src="horcrux.png" width="700">
 
 Horcrux is a Python script that glues a few well-known, trustworthy tools
 together for "Voldemort-style" encrypted backups. You can encrypt new
@@ -48,7 +48,7 @@ being physically robbed, or (much more likely) losing money on impulsive crypto 
 How does it work?
 -----------------
 
-All the keys are made with one command, like `horcrux setup my-first-horcruxes 3 5`.
+All the keys are made with one command, like `horcrux setup 3 5 my-first-horcruxes`.
 What it does is:
 
 1. Generate a random master password and break it into 5 shares using
@@ -65,14 +65,14 @@ These files are created in the `my-first-horcruxes` directory:
 * `sign.key` for signing secrets (keep this)
 * `verify.key` for checking signatures (keep + distribute this)
 * `decrypt.key` for decrypting (keep + distribute this; it's locked with the shares)
-* 5 `horcrux-XX.key` master password shares (distibute and/or keep in separate locations)
+* 5 `share-XX.key` master password shares (distibute and/or keep in separate locations)
 
 Now all you have to do is distribute them, encrypt some stuff,
 and test that you really can bring any 3 horcruxes together to decrypt!
 
 There are also some extra commands to help with distribution: `hide` to hide a
 horcrux in a photo or audio file, `unhide` to get it back, and `qrcode` to
-generate a QR code of it, suitable for printing.
+generate a QR code of it, suitable for printing. (NOTE: qrcodes not implemented yet)
 
 When you encrypt something with Horcrux it automatically signs it with your
 `sign.key`. That way when you distribute it to friends or family they can use
@@ -98,7 +98,7 @@ Instead you should take some common-sense security measures. In order of importa
 3. Right after generating your master password, open it in a text editor and
    manually change some characters. This protects against bugs in the system
    random number generator or me somehow having it generate easy-to-guess passwords.
-   Horcrux will prompt you to do that.
+   Horcrux will prompt you to do that. (NOTE: not implemented yet)
 
 The offline environment might seem like too much work, but is necessary if you
 want to protect something important, like cryptocurrency or highly sensitive documents.
@@ -134,7 +134,7 @@ computer in the future. You'll need to:
    and optionally add it to your `PATH`.
 
 3. Put the above dependencies in `live-additional-software.conf` in that folder too,
-   then reboot wait a couple minutes for them to be automatically installed.
+   then reboot and wait a couple minutes for them to be automatically installed.
 
 4. Check that `./horcrux --help` runs, then play around making a couple test horcruxes.
 
@@ -160,8 +160,8 @@ because you don't need to reboot into TAILS each time. It may also work with
 [Qubes Split GPG][6], although I haven't tried.
 
 
-[1]: usage.txt
-[2]: example.log
+[1]: ./usage.txt
+[2]: ./example.log
 [3]: https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing
 [4]: https://www.gnupg.org
 [5]: https://www.qubes-os.org
