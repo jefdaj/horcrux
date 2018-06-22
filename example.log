@@ -1,6 +1,6 @@
 $ # if you create keys for a 3-of-5 scheme
 $ horcrux -v setup 3 5 example
-creating temporary gpg instance with homedir /tmp/tmpyUprIk
+creating temporary gpg instance with homedir /tmp/tmpjmmSLz
 generating a master password, which won't be saved anywhere
 creating encrypt/decrypt keypair
 writing example/encrypt.key
@@ -24,7 +24,7 @@ $ # then encrypt a new file (aka update the secret)
 $ echo 'super secret message!' > example/secret.txt
 $
 $ horcrux -v encrypt example/{encrypt.key,sign.key,secret.txt,secret.txt.gpg}
-creating temporary gpg instance with homedir /tmp/tmpc2QTCb
+creating temporary gpg instance with homedir /tmp/tmpr8wFab
 importing gpg key example/encrypt.key
 importing gpg key example/sign.key
 encrypting example/secret.txt to "encrypt" (output in example/secret.txt.gpg)
@@ -34,14 +34,14 @@ $ # and distribute the verify and decrypt keys to trustees,
 $ # along with a password share each,
 $ # then they can each verify the signature
 $ horcrux -v verify example/{verify.key,secret.txt.gpg}
-creating temporary gpg instance with homedir /tmp/tmpmF7CED
+creating temporary gpg instance with homedir /tmp/tmppUzT38
 importing gpg key example/verify.key
 verifying example/secret.txt.gpg with example/verify.key
 verified signature for secret.txt.gpg
 $
 $ # but with only 1 or 2 shares, they can't decrypt it
 $ horcrux -v decrypt example/{decrypt.key,verify.key,secret.txt.gpg,secret-decrypt-with-keys.txt,share-{01,02}.key}
-creating temporary gpg instance with homedir /tmp/tmpbxB7YF
+creating temporary gpg instance with homedir /tmp/tmp6VSXqt
 calculating sha256sum of example/decrypt.key
 trying to reconstruct password from 1 shares... fail
 trying to reconstruct password from 2 shares... fail
@@ -50,7 +50,7 @@ $
 $ # 3 shares are needed to get the password,
 $ # which is needed to get the decrypt key, which is needed to get the secret
 $ horcrux -v decrypt example/{decrypt.key,verify.key,secret.txt.gpg,secret-decrypt-with-keys.txt,share-{01,04,05}.key}
-creating temporary gpg instance with homedir /tmp/tmp0qS4eH
+creating temporary gpg instance with homedir /tmp/tmpdXQzI6
 calculating sha256sum of example/decrypt.key
 trying to reconstruct password from 1 shares... fail
 trying to reconstruct password from 2 shares... fail
@@ -60,29 +60,29 @@ verifying example/secret.txt.gpg with example/verify.key
 verified signature for secret.txt.gpg
 decrypting secret.txt.gpg with decrypt.key and the password (output in secret-decrypt-with-keys.txt)
 importing gpg key example/decrypt.key
-decrypted secret.txt.gpg to secret-decrypt-with-keys.txt
+decrypted secret-decrypt-with-keys.txt
 $
 $ # optionally, you can hide keys in images or sound files
 $ horcrux -v hide example/decrypt.key example/share-01.key example.jpeg example/share-01.jpeg
 embedding "example/share-01.key" in "example.jpeg"... 0.2%embedding "example/share-01.key" in "example.jpeg"... done
 writing stego file "example/share-01.jpeg"... done
-creating temporary gpg instance with homedir /tmp/tmpYq2ooU
+creating temporary gpg instance with homedir /tmp/tmpHPp8RT
 calculating sha256sum of example/decrypt.key
 hiding example/share-01.key in example.jpeg (output in example/share-01.jpeg)
 $
 $ # the hidden files can be unhidden individually
 $ horcrux -v unhide example/{decrypt.key,share-01.jpeg,share-01-unhidden.key}
 wrote extracted data to "example/share-01-unhidden.key".
-creating temporary gpg instance with homedir /tmp/tmp2CUHJS
+creating temporary gpg instance with homedir /tmp/tmp7d4To1
 calculating sha256sum of example/decrypt.key
 extracting share-01.jpeg to example/share-01-unhidden.key
 $
 $ # or it will be done automatically during decryption
 $ horcrux -v decrypt example/{decrypt.key,verify.key,secret.txt.gpg,secret-decrypt-with-jpeg.txt,share-01.jpeg,share-{02,04}.key}
-wrote extracted data to "/tmp/tmpvYYdol.key".
-creating temporary gpg instance with homedir /tmp/tmpoGoNZ9
+wrote extracted data to "/tmp/tmpouhfoS.key".
+creating temporary gpg instance with homedir /tmp/tmp176sph
 calculating sha256sum of example/decrypt.key
-extracting share-01.jpeg to /tmp/tmpvYYdol.key
+extracting share-01.jpeg to /tmp/tmpouhfoS.key
 trying to reconstruct password from 1 shares... fail
 trying to reconstruct password from 2 shares... fail
 trying to reconstruct password from 3 shares... success!
@@ -91,7 +91,7 @@ verifying example/secret.txt.gpg with example/verify.key
 verified signature for secret.txt.gpg
 decrypting secret.txt.gpg with decrypt.key and the password (output in secret-decrypt-with-jpeg.txt)
 importing gpg key example/decrypt.key
-decrypted secret.txt.gpg to secret-decrypt-with-jpeg.txt
+decrypted secret-decrypt-with-jpeg.txt
 $
 $ # autoverify and autodecrypt modes will look for files
 $ # in the given directory (default: .), making it possible
@@ -105,7 +105,7 @@ verified signature for share-04.key
 verified signature for share-05.key
 $
 $ horcrux -v autodecrypt example
-creating temporary gpg instance with homedir /tmp/tmpwLxZez
+creating temporary gpg instance with homedir /tmp/tmpE96Dol
 importing gpg key example/verify.key
 verifying example/secret.txt.gpg with example/verify.key
 verified signature for secret.txt.gpg
@@ -130,7 +130,7 @@ trying to reconstruct password from 2 shares... fail
 trying to reconstruct password from 3 shares... success!
 decrypting secret.txt.gpg with decrypt.key and the password (output in secret.txt)
 importing gpg key example/decrypt.key
-decrypted secret.txt.gpg to secret.txt
+decrypted secret.txt
 $
 $ # final files:
 $ ls example
