@@ -1,0 +1,17 @@
+Horcrux: immortality for your encryption keys
+
+Usage:
+  horcrux  -h
+  horcrux [-v] autoverify  [<working-dir>]
+  horcrux [-v] autodecrypt [<working-dir>]
+  horcrux [-v] setup   <threshold> <shares> [<output-dir>]
+  horcrux [-v] sign    <sign-key> <file-to-sign>
+  horcrux [-v] encrypt <encrypt-key> <sign-key> <file-to-encrypt> <output-path>
+  horcrux [-v] verify  <verify-key> <locked-file>
+  horcrux [-v] decrypt <decrypt-key> <verify-key> <locked-file> <output-path> <share>...
+  horcrux [-v] hide    <decrypt-key> <file-to-hide> <cover-file> <output-path>
+  horcrux [-v] unhide  <decrypt-key> <stego-file> <output-path>
+
+Options:
+  -h --help     Show this text.
+  -v --verbose  Print a lot of messages.
