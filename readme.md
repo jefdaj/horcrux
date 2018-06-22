@@ -92,6 +92,7 @@ Instead you should take some common-sense security measures. In order of importa
 
 2. If you can you should read the source code. It's about 400 lines of Python.
    Alternatively, Horcrux can print out all the commands as it runs them (add `-v`).
+   (NOTE: partially implemented)
    You could re-run them yourself separately.
    Then you only have to trust the TAILS + Debian developers.
 
