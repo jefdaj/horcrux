@@ -11,10 +11,10 @@ export PATH="$PWD":$PATH
 say() { echo "$ # $1"; }
 run() { echo "$ $1" && eval "$1" ; echo "$"; }
 
-say "if you create keys for a 3-of-5 scheme"
+say "if you create keys for a 3-of-5 scheme..."
 run 'horcrux -v setup 3 5 example'
 
-say "then encrypt a new file (aka update the secret)"
+say "then encrypt a new file (aka update the secret)..."
 run "echo 'super secret message!' > example/secret.txt"
 run 'horcrux -v encrypt example/{encrypt.key,sign.key,secret.txt,secret.txt.gpg}'
 
