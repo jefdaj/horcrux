@@ -1,7 +1,7 @@
 Horcrux: immortality for your encryption keys
 =============================================
 
-<img src="horcrux.png" width="700">
+<img src="logo.png" width="700">
 
 Horcrux is a Python script that glues a few well-known, trustworthy tools
 together for "Voldemort-style" encrypted backups. You can encrypt new
