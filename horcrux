@@ -37,7 +37,7 @@ def create_shares(gpg, passwd, threshold, nshares, output_dir, verbose):
         if verbose:
             print 'writing share %d to %s' % (n, path)
         share = shares[n-1]
-        assert len(share) == 258 # TODO not needed if we test round trip later?
+        # assert len(share) == 258 # TODO not needed if we test round trip later?
         with open(path, 'w') as f:
             f.write('%s\n' % share)
         # TODO do I need to take a hash first and sign that or something?
