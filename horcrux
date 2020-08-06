@@ -13,6 +13,9 @@ from subprocess import check_call, check_output, Popen, PIPE
 from sys        import argv
 from tempfile   import mktemp, mkdtemp
 
+# TODO remove this once gpg flags are worked out
+TEST_PASSPHRASE = 'testpass123!#$'
+
 #########
 # setup #
 #########
@@ -62,9 +65,8 @@ def create_keypair(gpg, pubname, privname, passwd, output_dir, verbose):
         'key_length' : 4096,
         'name_real'  : 'horcrux ' + bothnames + ' key',
         'name_email' : 'horcrux-' + privname + '-key@fake.email', # TODO gotta be a better way right? key id?
+        'passphrase' : passwd
     }
-    if passwd:
-        params['passphrase'] = passwd
     gpg.gen_key(gpg.gen_key_input(**params))
     [pubname, privname] = bothnames.split('/')
     pubfile  = join(output_dir, pubname  + '.key')
@@ -72,39 +74,39 @@ def create_keypair(gpg, pubname, privname, passwd, output_dir, verbose):
     if verbose:
         print 'writing %s' % pubfile
     with open(pubfile, 'w') as f:
-        f.write(gpg.export_keys(pubname, False))
+        f.write(gpg.export_keys(pubname, secret=False))
     if verbose:
         print 'writing %s' % privfile
     with open(privfile, 'w') as f:
-        f.write(gpg.export_keys(privname, True))
+        f.write(gpg.export_keys(privname, secret=True, passphrase=passwd))
 
 def setup(gpg, threshold, nshares, output_dir, verbose=False):
     passwd = create_password(128, verbose)
-    create_keypair(gpg, 'encrypt', 'decrypt', passwd, output_dir, verbose)
-    create_keypair(gpg, 'verify' , 'sign'   , None  , output_dir, verbose)
+    create_keypair(gpg, 'encrypt', 'decrypt', passwd         , output_dir, verbose)
+    create_keypair(gpg, 'verify' , 'sign'   , TEST_PASSPHRASE, output_dir, verbose)
     create_shares(gpg, passwd, threshold, nshares, output_dir, verbose)
 
 ########
 # sign #
 ########
 
-def import_key(gpg, filename, verbose, passwd=None):
+def import_key(gpg, filename, verbose, passwd):
     if verbose:
         print 'importing gpg key %s' % filename
     with open(filename, 'rb') as f:
-        gpg.import_keys(f.read())
+        gpg.import_keys(f.read(), passphrase=passwd)
 
 def sign_file(gpg, keyname, file_to_sign, verbose):
     outfile = file_to_sign + '.sig' # TODO take an optional argument for this?
     if verbose:
         print 'signing %s with "%s" key (output in %s)' % (file_to_sign, keyname, outfile)
     with open(file_to_sign, 'r') as f:
-        signed = gpg.sign_file(f, keyid=keyname, detach=True)
+        signed = gpg.sign_file(f, keyid=keyname, detach=True, passphrase=TEST_PASSPHRASE)
     with open(outfile, 'wb') as f:
         f.write(signed.data)
 
 def sign(gpg, sign_key, file_to_sign, verbose):
-    import_key(gpg, sign_key, verbose)
+    import_key(gpg, sign_key, verbose, passwd=TEST_PASSPHRASE)
     sign_file(gpg, 'verify', file_to_sign, verbose)
 
 ###########
