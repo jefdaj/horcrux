@@ -340,8 +340,6 @@ def main(args):
 
     if args['setup']:
         output_dir = args['<output-dir>']
-        if not output_dir:
-            output_dir = '.'
         if not exists(output_dir):
             makedirs(output_dir)
         threshold = int(args['<threshold>'])
