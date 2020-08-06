@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 # TODO make permissions accessible to non-root user
+# TODO if it exists, pick up HORCRUX_KEY_DIR
 
 from docopt     import docopt
 from glob       import glob
@@ -307,7 +308,7 @@ def auto_decrypt(gpg, working_dir, verbose):
         pass
     files = find_files(working_dir)
     shares  = sorted(files['shares'])
-    secrets = sorted(files['secret'])
+    secrets = sorted(files['secret']) # TODO catch misc filenames here
     if len(files['decrypt_key']) == 0: raise SystemExit('decrypt key not found')
     if len(files['decrypt_key'])  > 1: raise SystemExit('multiple decrypt keys found')
     if len(shares ) == 0: raise SystemExit('no password shares found')
