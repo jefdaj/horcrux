@@ -86,7 +86,7 @@ def prompt_password(desc, confirm=True):
     if p1 == p2:
         return p1
     else:
-        print "error: passwords don't match. Try again..."
+        print "ERROR! passwords don't match"
         return prompt_password()
 
 def prompt_sign_passwd():
@@ -160,13 +160,13 @@ def verify(gpg, verify_key, signed_file, verbose):
     elif exists(asc_file):
         signature = asc_file
     else:
-        raise SystemExit('error! missing signature for %s' % signed_file)
+        print 'ERROR! missing signature for %s' % signed_file
     with open(signature, 'rb') as f:
         success = gpg.verify_file(f, data_filename=signed_file)
     if success:
         print 'verified signature for %s' % basename(signed_file)
     else:
-        raise SystemExit('error! failed to verify %s' % basename(signed_file))
+        print 'ERROR! failed to verify signature for %s' % basename(signed_file)
 
 ###########
 # decrypt #
@@ -227,12 +227,8 @@ def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
         untar(outfile, verbose)
 
 def decrypt(gpg, decrypt_key, secretfile, outfile, passwd, verbose, verify_key=None):
-    if verify_key:
-        # if verification of some files fails, we still want to attempt decryption
-        try:
-            verify(gpg, verify_key, secretfile, verbose)
-        except:
-            pass
+    if verify_key: # TODO assume this?
+        verify(gpg, verify_key, secretfile, verbose)
     decrypt_file(gpg, decrypt_key, secretfile, passwd, outfile, verbose)
 
 ########
@@ -306,7 +302,6 @@ def auto_verify(gpg, working_dir, verbose):
     files = find_files(working_dir)
     if len(files['verify_key']) == 0: raise SystemExit('verify key not found')
     if len(files['verify_key']) >  1: raise SystemExit('found multiple verify keys')
-    if len(files['secret'    ]) == 0: print 'secret file not found'
     key = files['verify_key'][0]
     signed_files = sorted(set(files['secret'] + files['shares'] + files['signed']))
     for signed_file in signed_files:
@@ -317,18 +312,14 @@ def auto_verify(gpg, working_dir, verbose):
 ################
 
 def auto_decrypt(gpg, working_dir, verbose):
-    # if verification of some files fails, we still want to attempt decryption
-    try:
-        auto_verify(gpg, working_dir, verbose)
-    except:
-        pass
+    auto_verify(gpg, working_dir, verbose)
     files = find_files(working_dir)
     shares  = sorted(files['shares'])
     secrets = sorted(files['secret']) # TODO catch misc filenames here
-    if len(files['decrypt_key']) == 0: raise SystemExit('decrypt key not found')
-    if len(files['decrypt_key'])  > 1: raise SystemExit('multiple decrypt keys found')
-    if len(shares ) == 0: raise SystemExit('no password shares found')
-    if len(secrets) == 0: raise SystemExit('no secret files found')
+    if len(files['decrypt_key']) == 0: raise SystemExit('ERROR! decrypt key not found')
+    if len(files['decrypt_key'])  > 1: raise SystemExit('ERROR! multiple decrypt keys found')
+    if len(shares ) == 0: raise SystemExit('ERROR! no password shares found')
+    if len(secrets) == 0: raise SystemExit('ERROR! no secret files found')
     decrypt_key = files['decrypt_key'][0]
     stego_pass  = sha256sum(decrypt_key, verbose)
     shares      = unhide_any(gpg, shares, stego_pass, verbose)
@@ -368,6 +359,7 @@ def main(args):
         master_pass = auto_recreate_password(shares, stego_pass, verbose)
         decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose, verify_key)
 
+    # TODO raise error if this fails due to incorrect password!
     elif args['sign']:
         sign_key     = args['<sign-key>']
         file_to_sign = args['<file-to-sign>']
