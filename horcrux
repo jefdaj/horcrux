@@ -78,8 +78,10 @@ def create_keypair(gpg, pubname, privname, passwd, output_dir, verbose):
     with open(privfile, 'w') as f:
         f.write(gpg.export_keys(privname, secret=True, passphrase=passwd))
 
-def prompt_password(desc):
+def prompt_password(desc, confirm=True):
     p1 = getpass(prompt='enter a password ' + desc + ': ')
+    if not confirm:
+        return p1
     p2 = getpass(prompt='confirm password ' + desc + ': ')
     if p1 == p2:
         return p1
@@ -87,8 +89,11 @@ def prompt_password(desc):
         print "error: passwords don't match. Try again..."
         return prompt_password()
 
+def prompt_sign_passwd():
+    return prompt_password('to unlock the signing key', confirm=False)
+
 def setup(gpg, threshold, nshares, output_dir, verbose=False):
-    sign_passwd = prompt_password('to shield the signing key')
+    sign_passwd = prompt_password('to shield the signing key', confirm=True)
     decrypt_passwd = create_password(128, verbose)
     create_keypair(gpg, 'encrypt', 'decrypt', decrypt_passwd, output_dir, verbose)
     create_keypair(gpg, 'verify' , 'sign'   , sign_passwd   , output_dir, verbose)
@@ -98,11 +103,11 @@ def setup(gpg, threshold, nshares, output_dir, verbose=False):
 # sign #
 ########
 
-def import_key(gpg, filename, verbose, passwd):
+def import_key(gpg, filename, verbose):
     if verbose:
-        print 'importing gpg key %s' % filename
+        print 'importing gpg public key %s' % filename
     with open(filename, 'rb') as f:
-        gpg.import_keys(f.read(), passphrase=passwd)
+        gpg.import_keys(f.read())
 
 def sign_file(gpg, keyname, sign_passwd, file_to_sign, verbose):
     outfile = file_to_sign + '.sig' # TODO take an optional argument for this?
@@ -114,7 +119,7 @@ def sign_file(gpg, keyname, sign_passwd, file_to_sign, verbose):
         f.write(signed.data)
 
 def sign(gpg, sign_key, sign_passwd, file_to_sign, verbose):
-    # import_key(gpg, sign_key, verbose, passwd=passwd)
+    import_key(gpg, sign_key, verbose)
     sign_file(gpg, 'verify', sign_passwd, file_to_sign, verbose)
 
 ###########
@@ -135,7 +140,8 @@ def encrypt_file(gpg, recipient, before_path, after_path, verbose):
 
 def encrypt(gpg, encrypt_key, sign_key, before, after, verbose):
     import_key(gpg, encrypt_key, verbose)
-    import_key(gpg, sign_key  , verbose)
+    sign_passwd = prompt_sign_passwd()
+    import_key(gpg, sign_key, verbose)
     encrypt_file(gpg, 'encrypt', before, after, verbose)
     sign_file(gpg, 'verify', sign_passwd, after, verbose)
 
@@ -365,7 +371,8 @@ def main(args):
     elif args['sign']:
         sign_key     = args['<sign-key>']
         file_to_sign = args['<file-to-sign>']
-        sign(gpg, sign_key, file_to_sign, verbose)
+        sign_passwd = prompt_sign_passwd()
+        sign(gpg, sign_key, sign_passwd, file_to_sign, verbose)
 
     elif args['encrypt']:
         sign_key    = args['<sign-key>']
@@ -376,7 +383,7 @@ def main(args):
 
     elif args['verify']:
         verify_key = args['<verify-key>']
-        secret     = args['<locked-file>']
+        secret     = args['<signed-file>']
         verify(gpg, verify_key, secret, verbose)
 
     elif args['hide']:
