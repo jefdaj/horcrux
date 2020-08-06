@@ -21,7 +21,7 @@ def create_password(nchars, verbose):
     if verbose:
         print "generating a master password, which won't be saved anywhere"
     cmd = ['pwgen', '--secure', str(nchars), '1']
-    return check_output(cmd)
+    return check_output(cmd).rstrip('\n') # remove trailing newline
 
 def create_shares(gpg, passwd, threshold, nshares, output_dir, verbose):
     if verbose:
