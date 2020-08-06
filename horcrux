@@ -34,7 +34,7 @@ def create_shares(gpg, passwd, threshold, nshares, output_dir, verbose):
     shares = out.split('\n')[1:-1]
     assert len(shares) == nshares
     for n in range(1, nshares+1):
-        path = join(output_dir, 'share-%.2d.key' % n)
+        path = join(output_dir, 'horcrux-%.2d.key' % n)
         if verbose:
             print 'writing share %d to %s' % (n, path)
         share = shares[n-1]
@@ -276,7 +276,7 @@ def find_files(working_dir):
         'secret'      : '.*\\.gpg$',
         'verify_key'  : '.*verify\\.key$',
         'decrypt_key' : '.*decrypt\\.key$',
-        'shares'      : '.*share.*\\.key$',
+        'shares'      : '.*horcrux.*\\.key$',
         'signatures'  : '.*\\.(sig|asc)$'
     }
     matches = {}
