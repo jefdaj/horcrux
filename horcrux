@@ -12,6 +12,7 @@ from re         import match
 from subprocess import check_call, check_output, Popen, PIPE
 from sys        import argv
 from tempfile   import mktemp, mkdtemp
+from getpass    import getpass
 
 # TODO remove this once gpg flags are worked out
 TEST_PASSPHRASE = 'testpass123!#$'
@@ -80,11 +81,21 @@ def create_keypair(gpg, pubname, privname, passwd, output_dir, verbose):
     with open(privfile, 'w') as f:
         f.write(gpg.export_keys(privname, secret=True, passphrase=passwd))
 
+def prompt_password(desc):
+    p1 = getpass(prompt='Enter a password for ' + desc + ': ')
+    p2 = getpass(prompt='Confirm password for ' + desc + ': ')
+    if p1 == p2:
+        return p1
+    else:
+        print "Error: passwords don't match. Try again..."
+        return prompt_password()
+
 def setup(gpg, threshold, nshares, output_dir, verbose=False):
-    passwd = create_password(128, verbose)
-    create_keypair(gpg, 'encrypt', 'decrypt', passwd         , output_dir, verbose)
+    sign_passwd = prompt_password('the signing key')
+    decrypt_passwd = create_password(128, verbose)
+    create_keypair(gpg, 'encrypt', 'decrypt', decrypt_passwd , output_dir, verbose)
     create_keypair(gpg, 'verify' , 'sign'   , TEST_PASSPHRASE, output_dir, verbose)
-    create_shares(gpg, passwd, threshold, nshares, output_dir, verbose)
+    create_shares(gpg, decrypt_passwd, threshold, nshares, output_dir, verbose)
 
 ########
 # sign #
