@@ -14,9 +14,6 @@ from sys        import argv
 from tempfile   import mktemp, mkdtemp
 from getpass    import getpass
 
-# TODO remove this once gpg flags are worked out
-TEST_PASSPHRASE = 'testpass123!#$'
-
 #########
 # setup #
 #########
@@ -27,14 +24,14 @@ def create_password(nchars, verbose):
     cmd = ['pwgen', '--secure', str(nchars), '1']
     return check_output(cmd).rstrip('\n') # remove trailing newline
 
-def create_shares(gpg, passwd, threshold, nshares, output_dir, verbose):
+def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_dir, verbose):
     if verbose:
         msg = 'splitting the master password into %d shares (horcruxes), any %d of which can reconstruct it'
         print msg % (nshares, threshold)
     # TODO -w token? -x (hex mode)? small or variable-length strings instead of 1024?
     cmd = ['ssss-split', '-t', str(threshold), '-n', str(nshares), '-s', '1024']
     proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    (out, err) = proc.communicate(passwd)
+    (out, err) = proc.communicate(decrypt_passwd)
     shares = out.split('\n')[1:-1]
     assert len(shares) == nshares
     for n in range(1, nshares+1):
@@ -46,7 +43,7 @@ def create_shares(gpg, passwd, threshold, nshares, output_dir, verbose):
         with open(path, 'w') as f:
             f.write('%s\n' % share)
         # TODO do I need to take a hash first and sign that or something?
-        sign_file(gpg, 'verify', path, verbose)
+        sign_file(gpg, 'verify', sign_passwd, path, verbose)
 
 def create_keyring(home, verbose):
     if verbose:
@@ -82,20 +79,20 @@ def create_keypair(gpg, pubname, privname, passwd, output_dir, verbose):
         f.write(gpg.export_keys(privname, secret=True, passphrase=passwd))
 
 def prompt_password(desc):
-    p1 = getpass(prompt='Enter a password for ' + desc + ': ')
-    p2 = getpass(prompt='Confirm password for ' + desc + ': ')
+    p1 = getpass(prompt='enter a password ' + desc + ': ')
+    p2 = getpass(prompt='confirm password ' + desc + ': ')
     if p1 == p2:
         return p1
     else:
-        print "Error: passwords don't match. Try again..."
+        print "error: passwords don't match. Try again..."
         return prompt_password()
 
 def setup(gpg, threshold, nshares, output_dir, verbose=False):
-    sign_passwd = prompt_password('the signing key')
+    sign_passwd = prompt_password('to shield the signing key')
     decrypt_passwd = create_password(128, verbose)
-    create_keypair(gpg, 'encrypt', 'decrypt', decrypt_passwd , output_dir, verbose)
-    create_keypair(gpg, 'verify' , 'sign'   , TEST_PASSPHRASE, output_dir, verbose)
-    create_shares(gpg, decrypt_passwd, threshold, nshares, output_dir, verbose)
+    create_keypair(gpg, 'encrypt', 'decrypt', decrypt_passwd, output_dir, verbose)
+    create_keypair(gpg, 'verify' , 'sign'   , sign_passwd   , output_dir, verbose)
+    create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_dir, verbose)
 
 ########
 # sign #
@@ -107,18 +104,18 @@ def import_key(gpg, filename, verbose, passwd):
     with open(filename, 'rb') as f:
         gpg.import_keys(f.read(), passphrase=passwd)
 
-def sign_file(gpg, keyname, file_to_sign, verbose):
+def sign_file(gpg, keyname, sign_passwd, file_to_sign, verbose):
     outfile = file_to_sign + '.sig' # TODO take an optional argument for this?
     if verbose:
         print 'signing %s with "%s" key (output in %s)' % (file_to_sign, keyname, outfile)
     with open(file_to_sign, 'r') as f:
-        signed = gpg.sign_file(f, keyid=keyname, detach=True, passphrase=TEST_PASSPHRASE)
+        signed = gpg.sign_file(f, keyid=keyname, detach=True, passphrase=sign_passwd)
     with open(outfile, 'wb') as f:
         f.write(signed.data)
 
-def sign(gpg, sign_key, file_to_sign, verbose):
-    import_key(gpg, sign_key, verbose, passwd=TEST_PASSPHRASE)
-    sign_file(gpg, 'verify', file_to_sign, verbose)
+def sign(gpg, sign_key, sign_passwd, file_to_sign, verbose):
+    # import_key(gpg, sign_key, verbose, passwd=passwd)
+    sign_file(gpg, 'verify', sign_passwd, file_to_sign, verbose)
 
 ###########
 # encrypt #
@@ -140,7 +137,7 @@ def encrypt(gpg, encrypt_key, sign_key, before, after, verbose):
     import_key(gpg, encrypt_key, verbose)
     import_key(gpg, sign_key  , verbose)
     encrypt_file(gpg, 'encrypt', before, after, verbose)
-    sign_file(gpg, 'verify', after, verbose)
+    sign_file(gpg, 'verify', sign_passwd, after, verbose)
 
 ##########
 # verify #
