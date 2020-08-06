@@ -211,8 +211,11 @@ def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
 
 def decrypt(gpg, decrypt_key, secretfile, outfile, passwd, verbose, verify_key=None):
     if verify_key:
-        # TODO abort on failure?
-        verify(gpg, verify_key, secretfile, verbose)
+        # if verification of some files fails, we still want to attempt decryption
+        try:
+            verify(gpg, verify_key, secretfile, verbose)
+        except:
+            pass
     decrypt_file(gpg, decrypt_key, secretfile, passwd, outfile, verbose)
 
 ########
@@ -297,7 +300,11 @@ def auto_verify(gpg, working_dir, verbose):
 ################
 
 def auto_decrypt(gpg, working_dir, verbose):
-    auto_verify(gpg, working_dir, verbose)
+    # if verification of some files fails, we still want to attempt decryption
+    try:
+        auto_verify(gpg, working_dir, verbose)
+    except:
+        pass
     files = find_files(working_dir)
     shares  = sorted(files['shares'])
     secrets = sorted(files['secret'])
