@@ -15,3 +15,4 @@ Usage:
 Options:
   -h --help     Show this text.
   -v --verbose  Print a lot of messages.
+  <output-dir>  Where to put generated files [default: .]
