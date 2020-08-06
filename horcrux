@@ -60,8 +60,8 @@ def create_keypair(gpg, pubname, privname, passwd, output_dir, verbose):
     params = {
         'key_type'   : 'RSA',
         'key_length' : 4096,
-        'name_real'  : bothnames,
-        'name_email' : privname # TODO gotta be a better way right? key id?
+        'name_real'  : 'horcrux ' + bothnames + ' key',
+        'name_email' : 'horcrux-' + privname + '-key@fake.email', # TODO gotta be a better way right? key id?
     }
     if passwd:
         params['passphrase'] = passwd
