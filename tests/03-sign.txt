@@ -1,0 +1,5 @@
+spawn horcrux sign sign.key secret1.txt
+enter a password to unlock sign.key: 
+  1 secret1.txt
+ 17 secret1.txt.sig
+ 18 total
