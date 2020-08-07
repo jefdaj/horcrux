@@ -20,9 +20,17 @@ from getpass    import getpass
 
 def create_password(nchars, verbose):
     if verbose:
-        print "generating a 128-char master password to shield the decrypt key"
+        print "generating a %d-char master password to shield the decrypt key" % nchars
+        print 'optionally, you can include some text of your own here as well.'
+        print 'that way it will be secure even if your os has been compromised!'
+        print 'just randomly mash out something up to %d characters long,' % (nchars / 2)
+        print 'and the rest will be filled in using the system random number generator.'
+    msg = "enter up to %d alphanumeric chars to mix in to the master password: " % (nchars / 2)
+    user_chars = raw_input(msg).replace('\n', '')[:65]
+    nchars = nchars - len(user_chars)
     cmd = ['pwgen', '--secure', str(nchars), '1']
-    return check_output(cmd).rstrip('\n') # remove trailing newline
+    passwd = check_output(cmd).rstrip('\n') + user_chars
+    return passwd
 
 def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_dir, verbose):
     if verbose:
