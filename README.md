@@ -138,27 +138,25 @@ I recommend doing everything in [TAILS][8] because it's portable, relatively sim
 to set up, leaves no trace of your keys on disk, and will work on a different
 computer in the future. You'll need to:
 
-1. Download and install TAILS on a USB drive,
-   enable persistent storage with apt cache, and reboot.
+1. Download and install TAILS on a USB drive.
 
-2. Clone this repository in `/live/persistent/TailsData_unlocked`,
-   and optionally add it to your `PATH`.
+2. Install Horcrux: enable persistent storage with apt cache (see
+   [these config files](./tails)), clone this repository into
+   `/live/persistent/TailsData_unlocked/horcrux`, and add it to your `PATH`.
 
-3. Put the above dependencies in `live-additional-software.conf` in that folder too,
-   then reboot and wait a couple minutes for them to be automatically installed.
+3. Reboot, wait for the dependencies to install, check that `horcrux --help`
+   runs, then play around making a few test horcruxes.
 
-4. Check that `horcrux --help` runs, then play around making a few test horcruxes.
-
-5. Reboot one more time so you can `Disable all networking` at the startup
+4. Reboot one more time so you can `Disable all networking` at the startup
    screen before generating your real keys.
 
-7. Practice moving your horcrux keys to separate media, destroying the originals,
+5. Practice moving your horcrux keys to separate media, destroying the originals,
    and putting them back together to unlock your data. Convince yourself it will
    definitely work when you need it.
 
-8. Finally, delete the original secrets! This is emotionally hard, but doing step
-   7 some more should help. You might want to wait a week or a month, then make sure
-   your horcruxes work, then finally delete them.
+6. Delete the original secrets! This is emotionally hard, but repeating step 7
+   again should help. You might want to wait a week or a month, then make sure
+   your horcruxes work, then finally delete the original secrets.
 
 You can also repeat these steps to make a "Horcrux live USB" for friends and
 family. Copy the `verify.desktop` and `decrypt.desktop` launchers into their
@@ -183,6 +181,8 @@ Donations
 =========
 
 I accept donations of any other crypto too! Just email or open an issue.
+
+Cardano: 
 
 Bitcoin: 1PEhbpXYrtwK4JWfrrhCcWt4sgxijc9CT7
 
