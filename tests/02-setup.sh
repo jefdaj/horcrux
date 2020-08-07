@@ -11,4 +11,3 @@ expect eof
 END
 
 wc -l my-first-horcrux/*
-rm -rf my-first-horcrux
