@@ -106,10 +106,10 @@ Instead you should take some common-sense security measures. In order of importa
    You could re-run them yourself separately.
    Then you only have to trust the TAILS + Debian developers.
 
-3. Right after generating your master password, open it in a text editor and
-   manually change some characters. This protects against bugs in the system
-   random number generator or me somehow having it generate easy-to-guess passwords.
-   Horcrux will prompt you to do that. (NOTE: not implemented yet)
+3. Right after generating your master password, manually change some
+   characters.  This protects against bugs in the system random number
+   generator or me somehow having it generate easy-to-guess passwords.
+   Horcrux will prompt you to do that.
 
 The offline environment might seem like too much work, but is necessary if you
 want to protect something important, like cryptocurrency or highly sensitive documents.
@@ -141,16 +141,24 @@ computer in the future. You'll need to:
 1. Download and install TAILS on a USB drive,
    enable persistent storage with apt cache, and reboot.
 
-2. Clone this repository somewhere in `/live/persistent/TailsData_unlocked`,
+2. Clone this repository in `/live/persistent/TailsData_unlocked`,
    and optionally add it to your `PATH`.
 
 3. Put the above dependencies in `live-additional-software.conf` in that folder too,
    then reboot and wait a couple minutes for them to be automatically installed.
 
-4. Check that `./horcrux --help` runs, then play around making a couple test horcruxes.
+4. Check that `horcrux --help` runs, then play around making a few test horcruxes.
 
 5. Reboot one more time so you can `Disable all networking` at the startup
    screen before generating your real keys.
+
+7. Practice moving your horcrux keys to separate media, destroying the originals,
+   and putting them back together to unlock your data. Convince yourself it will
+   definitely work when you need it.
+
+8. Finally, delete the original secrets! This is emotionally hard, but doing step
+   7 some more should help. You might want to wait a week or a month, then make sure
+   your horcruxes work, then finally delete them.
 
 You can also repeat these steps to make a "Horcrux live USB" for friends and
 family. Copy the `verify.desktop` and `decrypt.desktop` launchers into their
