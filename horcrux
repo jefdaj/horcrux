@@ -96,7 +96,7 @@ def prompt_password(desc, confirm=True):
         return p1
     else:
         print "ERROR! passwords don't match"
-        return prompt_password()
+        return prompt_password(desc, confirm)
 
 def prompt_sign_passwd(filename):
     return prompt_password('to unlock %s' % filename, confirm=False)
