@@ -3,3 +3,4 @@ python2 is installed
 horcrux is installed
 steghide is installed
 ssss-split is installed
+expect is installed

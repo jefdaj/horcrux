@@ -7,6 +7,7 @@ cd "$HORCRUX_DIR"/tests
 
 for script in *.sh; do
   log_file="${script/.sh/.txt}"
-  echo -n "running $script... "
+  test_dir="${script/.sh/}"
+  echo -n "running ${script}... "
   . "$script" 2>&1 > "$log_file" && echo "ok" || echo "ERROR"
 done
