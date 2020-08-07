@@ -192,8 +192,8 @@ Litecoin: MBBgdzToFS3aY2yrqu4F42RLvoo8iw6cNF
 
 
 [1]: ./usage.txt
-[2]: ./example/example.log
-[3]: ./example/example.sh
+[2]: ./tests/example.log
+[3]: ./tests/example.sh
 [4]: https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing
 [5]: https://www.gnupg.org
 [6]: https://www.qubes-os.org
