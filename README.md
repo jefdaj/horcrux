@@ -18,7 +18,8 @@ bottom). All I ask is during the next bull run, if you suddenly have a scary
 amount of money, spare a thought for the little project that keeps it from
 actually being scary!
 
-Check out this readme, [usage.txt][1], or [the test scripts][2] to get started.
+Check out the rest of this readme, [usage.txt][1], or [the test scripts][2] to get started.
+I'm also working on a series of short video tutorials.
 
 
 I'm just a normal person. Why do I need that?
@@ -60,21 +61,26 @@ How does it work?
 All the keys are made with one command, like `horcrux setup 3 5 my-first-horcruxes`.
 What it does is:
 
-1. Generate a random master password and break it into 5 shares using
+1. Generate a long random master password and break it into 5 shares (aka horcruxes) using
    [Shamir's secret sharing scheme][4], with 3 of the 5 required to reconstruct it.
 
-2. Generate an encrypt/decrypt [GPG keypair][5] and encrypt the private (decrypt)
-   key with the master password.
+2. Generate an encrypt/decrypt [GPG keypair][5] and shield the private (decrypt)
+   key with the master password. This makes it possible to make new encrypted files
+   from your day-to-day computing environment using the encrypt key,
+   but then to decrypt them you need access to 3 of the 5 horcruxes.
 
-3. Generate a separate sign/verify GPG keypair for signature checking.
+3. Generate a separate sign/verify GPG keypair for signing the encrypted files.
+   You can use your own existing GPG key for this instead if you want.
+   This lets your friends/family check that encrypted files are really from you
+   and were transferred correctly, even though they can't read them.
 
 These files are created in the `my-first-horcruxes` directory:
 
 * `encrypt.key` for encrypting secrets (keep this)
 * `sign.key` for signing secrets (keep this)
 * `verify.key` for checking signatures (keep + distribute this)
-* `decrypt.key` for decrypting (keep + distribute this; it's locked with the shares)
-* 5 `share-XX.key` master password shares (distibute and/or keep in separate locations)
+* `decrypt.key` for decrypting (keep + distribute this; it's locked with the horcruxes)
+* 5 `horcrux-XX.key` master password shares (distibute and/or keep them in separate locations)
 
 Now all you have to do is distribute them, encrypt some stuff,
 and test that you really can bring any 3 horcruxes together to decrypt!
@@ -93,26 +99,28 @@ Can I trust you?
 ----------------
 
 No. I mean, yes, but there's no way to prove that and you shouldn't rely on it.
-Instead you should take some common-sense security measures. In order of importance:
+Instead you should take some common-sense security measures:
 
 1. Set it up in an isolated environment like [TAILS][8] (see below), make sure
    everything works, then never connect it to the internet again after generating
-   your keys.
+   your keys. That way, the only way for anyone to get your master password
+   would be if they already hacked the TAILS random number generator beforehand,
+   or they're physically watching you. Most people don't need to worry about that.
 
-2. If you can you should read the source code. It's about 400 lines of Python.
+2. While generating your master password, manually change some
+   characters. This protects against bugs in the system random number
+   generator or me somehow making it generate easy-to-guess passwords.
+   Horcrux will prompt you to do that.
+
+3. If you can you should read the source code. It's about 400 lines of Python.
    Alternatively, Horcrux can print out all the commands as it runs them (add `-v`).
    (NOTE: partially implemented)
    You could re-run them yourself separately.
    Then you only have to trust the TAILS + Debian developers.
 
-3. Right after generating your master password, manually change some
-   characters.  This protects against bugs in the system random number
-   generator or me somehow having it generate easy-to-guess passwords.
-   Horcrux will prompt you to do that.
-
 The offline environment might seem like too much work, but is necessary if you
 want to protect something important, like cryptocurrency or highly sensitive documents.
-Computers get hacked all the time! The other two are optional.
+Computers get hacked all the time!
 
 
 TAILS install
