@@ -182,7 +182,7 @@ Donations
 
 I accept donations of any other crypto too! Just email or open an issue.
 
-Cardano: 
+Cardano: addr1qxj9jgy6q2djt9qqd3qvccdwp6hs0h9rdh4jxa39qwp384d6n2up76s6lej6vqv2yatkvgrp6vddzj0qfupjepsqvcusqg3r69
 
 Bitcoin: 1PEhbpXYrtwK4JWfrrhCcWt4sgxijc9CT7
 
