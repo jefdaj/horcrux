@@ -18,6 +18,7 @@ from getpass    import getpass
 # setup #
 #########
 
+# TODO prompt for some user input chars to mix in too
 def create_password(nchars, verbose):
     if verbose:
         print "generating a %d-char master password to shield the decrypt key" % nchars
@@ -51,7 +52,7 @@ def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_d
         with open(path, 'w') as f:
             f.write('%s\n' % share)
         # TODO do I need to take a hash first and sign that or something?
-        sign_file(gpg, 'verify', sign_passwd, path, verbose)
+        sign_file(gpg, 'verify', sign_passwd, path, verbose) # TODO have to adjust 'verify' to the keyid?
 
 def create_keyring(home, verbose):
     if verbose:
@@ -97,14 +98,18 @@ def prompt_password(desc, confirm=True):
         print "ERROR! passwords don't match"
         return prompt_password()
 
-def prompt_sign_passwd():
-    return prompt_password('to unlock the signing key', confirm=False)
+def prompt_sign_passwd(filename):
+    return prompt_password('to unlock %s' % filename, confirm=False)
 
-def setup(gpg, threshold, nshares, output_dir, verbose=False):
-    sign_passwd = prompt_password('to shield the signing key', confirm=True)
+def setup(gpg, threshold, nshares, output_dir, verbose=False, sign_key=None):
     decrypt_passwd = create_password(128, verbose)
     create_keypair(gpg, 'encrypt', 'decrypt', decrypt_passwd, output_dir, verbose)
-    create_keypair(gpg, 'verify' , 'sign'   , sign_passwd   , output_dir, verbose)
+    if sign_key is None:
+        sign_passwd = prompt_password('to shield the signing key', confirm=True)
+        create_keypair(gpg, 'verify', 'sign', sign_passwd, output_dir, verbose)
+    else:
+        sign_passwd = prompt_sign_passwd(sign_key)
+        import_key(gpg, sign_key, verbose)
     create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_dir, verbose)
 
 ########
@@ -117,8 +122,9 @@ def import_key(gpg, filename, verbose):
     with open(filename, 'rb') as f:
         gpg.import_keys(f.read())
 
+# TODO catch gpg errors here
 def sign_file(gpg, keyname, sign_passwd, file_to_sign, verbose):
-    outfile = file_to_sign + '.sig' # TODO take an optional argument for this?
+    outfile = file_to_sign + '.sig'
     if verbose:
         print 'signing %s with "%s" key (output in %s)' % (file_to_sign, keyname, outfile)
     with open(file_to_sign, 'r') as f:
@@ -148,7 +154,7 @@ def encrypt_file(gpg, recipient, before_path, after_path, verbose):
 
 def encrypt(gpg, encrypt_key, sign_key, before, after, verbose):
     import_key(gpg, encrypt_key, verbose)
-    sign_passwd = prompt_sign_passwd()
+    sign_passwd = prompt_sign_passwd(sign_key)
     import_key(gpg, sign_key, verbose)
     encrypt_file(gpg, 'encrypt', before, after, verbose)
     sign_file(gpg, 'verify', sign_passwd, after, verbose)
@@ -287,7 +293,7 @@ def unhide_any(gpg, shares, passphrase, verbose):
 # auto-verify #
 ###############
 
-def find_files(working_dir):
+def find_files(working_dir, verify_key=None):
     # TODO be more intelligent about names? this fails if they're at all tricky
     if not working_dir:
         working_dir = '.'
@@ -302,12 +308,15 @@ def find_files(working_dir):
     matches = {}
     for key in filters:
         matches[key] = sorted(f for f in files if match(filters[key], f))
+    if verify_key is not None:
+        matches['verify_key'] = [verify_key]
     matches['shares'] = sorted(s for s in matches['shares'] if not s.endswith('.sig'))
     matches['signed'] = sorted(splitext(s)[0] for s in matches['signatures'])
     return matches
 
-def auto_verify(gpg, working_dir, verbose):
-    files = find_files(working_dir)
+def auto_verify(gpg, working_dir, verbose, verify_key=None):
+    files = find_files(working_dir, verify_key)
+    # print 'files: %s' % files
     if len(files['verify_key']) == 0: raise SystemExit('verify key not found')
     if len(files['verify_key']) >  1: raise SystemExit('found multiple verify keys')
     key = files['verify_key'][0]
@@ -319,9 +328,9 @@ def auto_verify(gpg, working_dir, verbose):
 # auto-decrypt #
 ################
 
-def auto_decrypt(gpg, working_dir, verbose):
-    auto_verify(gpg, working_dir, verbose)
-    files = find_files(working_dir)
+def auto_decrypt(gpg, working_dir, verbose, verify_key=None):
+    auto_verify(gpg, working_dir, verbose, verify_key)
+    files = find_files(working_dir, verify_key)
     shares  = sorted(files['shares'])
     secrets = sorted(files['secret']) # TODO catch misc filenames here
     if len(files['decrypt_key']) == 0: raise SystemExit('ERROR! decrypt key not found')
@@ -345,14 +354,18 @@ def main(args):
     # with tempfile.TemporaryDirectory() as home:
     home = mkdtemp() # TODO use a context or handle exceptions
     gpg = create_keyring(home, verbose)
+    
+    # print 'args: %s' % args
 
     if args['setup']:
         output_dir = args['<output-dir>']
+        if output_dir is None:
+            output_dir = '.'
         if not exists(output_dir):
             makedirs(output_dir)
         threshold = int(args['<threshold>'])
         shares    = int(args['<shares>'])
-        setup(gpg, threshold, shares, output_dir, verbose)
+        setup(gpg, threshold, shares, output_dir, verbose, sign_key=args['-s'])
 
     elif args['decrypt']:
         decrypt_key = args['<decrypt-key>']
@@ -369,7 +382,7 @@ def main(args):
     elif args['sign']:
         sign_key     = args['<sign-key>']
         file_to_sign = args['<file-to-sign>']
-        sign_passwd = prompt_sign_passwd()
+        sign_passwd = prompt_sign_passwd(sign_key)
         sign(gpg, sign_key, sign_passwd, file_to_sign, verbose)
 
     elif args['encrypt']:
@@ -401,11 +414,11 @@ def main(args):
 
     elif args['autoverify']:
         working_dir = args['<working-dir>']
-        auto_verify(gpg, working_dir, verbose)
+        auto_verify(gpg, working_dir, verbose, verify_key=args['-p'])
 
     elif args['autodecrypt']:
         working_dir = args['<working-dir>']
-        auto_decrypt(gpg, working_dir, verbose)
+        auto_decrypt(gpg, working_dir, verbose, verify_key=args['-p'])
 
 if __name__ == '__main__':
     with open(join(dirname(__file__), 'usage.txt'), 'r') as f:
