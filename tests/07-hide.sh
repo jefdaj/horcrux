@@ -8,4 +8,10 @@ spawn horcrux hide decrypt.key horcrux-01.key ../../assets/example.jpeg horcrux-
 expect eof
 END
 
-file *.jpeg
+expect << END
+set timeout 10
+spawn horcrux hide decrypt.key horcrux-02.key ../../assets/example.wav  horcrux-02.wav
+expect eof
+END
+
+file *.jpeg *.wav

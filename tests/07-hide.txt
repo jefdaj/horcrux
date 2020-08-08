@@ -1,4 +1,8 @@
 spawn horcrux hide decrypt.key horcrux-01.key ../../assets/example.jpeg horcrux-01.jpeg
 embedding "horcrux-01.key" in "../../assets/example.jpeg"... 0.2%embedding "horcrux-01.key" in "../../assets/example.jpeg"... done
 writing stego file "horcrux-01.jpeg"... done
+spawn horcrux hide decrypt.key horcrux-02.key ../../assets/example.wav horcrux-02.wav
+embedding "horcrux-02.key" in "../../assets/example.wav"... 0.2%embedding "horcrux-02.key" in "../../assets/example.wav"... done
+writing stego file "horcrux-02.wav"... done
 horcrux-01.jpeg: JPEG image data, JFIF standard 1.01, resolution (DPI), density 300x300, segment length 16, baseline, precision 8, 517x577, components 3
+horcrux-02.wav:  RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, stereo 44100 Hz
