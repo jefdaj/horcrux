@@ -1,0 +1,35 @@
+trying to decrypt with 1 keys... 
+verified signature for horcrux-01.key
+verified signature for secret1.txt.gpg
+failed to reconstruct master password
+
+trying to decrypt with 2 keys... 
+verified signature for horcrux-01.key
+verified signature for horcrux-02.key
+verified signature for secret1.txt.gpg
+failed to reconstruct master password
+
+trying to decrypt with 3 keys... 
+verified signature for horcrux-01.key
+verified signature for horcrux-02.key
+verified signature for horcrux-03.key
+verified signature for secret1.txt.gpg
+decrypted secret1.txt
+
+trying to decrypt with 4 keys... 
+verified signature for horcrux-01.key
+verified signature for horcrux-02.key
+verified signature for horcrux-03.key
+verified signature for horcrux-04.key
+verified signature for secret1.txt.gpg
+decrypted secret1.txt
+
+trying to decrypt with 5 keys... 
+verified signature for horcrux-01.key
+verified signature for horcrux-02.key
+verified signature for horcrux-03.key
+verified signature for horcrux-04.key
+verified signature for horcrux-05.key
+verified signature for secret1.txt.gpg
+decrypted secret1.txt
+
