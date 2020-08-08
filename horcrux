@@ -188,7 +188,7 @@ def verify(gpg, verify_key, signed_file, verbose):
 
 def recreate_password(threshold, share_paths, stego_pass, verbose):
     if verbose:
-        print 'trying to reconstruct password from %d shares...' % threshold,
+        print 'trying to reconstruct master password from %d shares...' % threshold,
     cmd = ['ssss-combine', '-t', str(threshold)]
     shares = '' # newline-separated list of shares
     for path in share_paths:
@@ -214,7 +214,7 @@ def auto_recreate_password(share_paths, stego_pass, verbose):
         except:
             # raise
             continue
-    print 'failed to reconstruct password'
+    print 'failed to reconstruct master password'
     raise SystemExit(1)
 
 def untar(tarfile, verbose):
