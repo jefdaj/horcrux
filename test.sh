@@ -15,4 +15,6 @@ done
 
 # remove test dirs at the end rather than one at a time,
 # so they can use each others' output
-find * -maxdepth 1 -type d | xargs rm -rf
+cd "$HORCRUX_DIR"
+find tests/* -maxdepth 1 -type d | xargs rm -rf
+git diff tests
