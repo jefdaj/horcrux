@@ -1,7 +1,7 @@
 Horcrux: immortality for your encryption keys
 =============================================
 
-<img src="logo.png" width="700">
+<img src="assets/logo.png" width="700" align="center">
 
 Horcrux is a Python script that glues a few well-known, trustworthy tools
 together for "Voldemort-style" encrypted backups. You can encrypt new
@@ -89,11 +89,6 @@ There are also some extra commands to help with distribution: `hide` to hide a
 horcrux in a photo or audio file, `unhide` to get it back, and `qrcode` to
 generate a QR code of it, suitable for printing. (NOTE: qrcodes not implemented yet)
 
-When you encrypt something with Horcrux it automatically signs it with your
-`sign.key`. That way when you distribute it to friends or family they can use
-`verify.key` to check that the file is correct (actually from you and not
-corrupted during transfer), even though they can't open it.
-
 
 Can I trust you?
 ----------------
@@ -161,7 +156,7 @@ computer in the future. You'll need to:
    and putting them back together to unlock your data. Convince yourself it will
    definitely work when you need it.
 
-6. Delete the original secrets! This is emotionally hard, but repeating step 7
+6. Delete the original secrets! This is emotionally hard, but repeating step 5
    again should help. You might want to wait a week or a month, then make sure
    your horcruxes work, then finally delete the original secrets.
 
