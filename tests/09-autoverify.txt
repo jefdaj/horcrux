@@ -1,0 +1,7 @@
+verified signature for horcrux-01.key
+verified signature for horcrux-02.key
+verified signature for horcrux-03.key
+verified signature for horcrux-04.key
+verified signature for horcrux-05.key
+ERROR! failed to verify signature for secret1.txt
+verified signature for secret1.txt.gpg
