@@ -157,12 +157,14 @@ computer in the future. You'll need to:
        You probably want to *disable* `Network Connections`.
 
 4. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
-   put in the temporary root password, and run these commands:
+   put in the temporary root password, and run these commands. You can open `Tor Browser`
+   and go to this page to copy + paste if you like.
 
      ```
-     apt install -y gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
      cd /live/persistent/TailsData_unlocked
      git clone https://github.com/jefdaj/horcrux
+     echo 'export PATH=/live/persistence/TailsData_unlocked/horcrux:$PATH' >> /home/amnesia/.bashrc
+     apt install -y gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
      ```
 
    If prompted, say yes you want to make the new software persistent.
@@ -171,24 +173,27 @@ computer in the future. You'll need to:
      ```
      cd horcrux
      ./test.sh
-     
+     running 00-deps.sh... ok
+     running 01-help.sh... ok
+     running 02-setup.sh... ok
+     running 03-sign.sh... ok
+     running 04-encrypt.sh... ok
+     running 05-verify.sh... ok
+     running 06-decrypt.sh... ok
+     running 07-hide.sh... ok
+     running 08-unhide.sh... ok
+     running 09-autoverify.sh... ok
+     running 10-autodecrypt.sh... ok
      ```
 
-2. Install Horcrux: enable persistent storage with apt cache (see
-   [these config files](./tails)), clone this repository into
-   `/live/persistent/TailsData_unlocked/horcrux`, and add it to your `PATH`.
-
-3. Reboot, wait for the dependencies to install, check that `horcrux --help`
-   runs, then play around making a few test horcruxes.
-
-4. Reboot one more time so you can `Disable all networking` at the startup
+5. Reboot one more time so you can `Disable all networking` at the startup
    screen before generating your real keys.
 
-5. Practice moving your horcrux keys to separate media, destroying the originals,
+6. Practice moving your horcrux keys to separate media, destroying the originals,
    and putting them back together to unlock your data. Convince yourself it will
    definitely work when you need it.
 
-6. Delete the original secrets! This is emotionally hard, but repeating step 5
+7. Delete the original secrets! This is emotionally hard, but repeating step 5
    again should help. You might want to wait a week or a month, then make sure
    your horcruxes work, then finally delete the original secrets.
 
