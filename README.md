@@ -6,10 +6,11 @@ Horcrux: immortality for your encryption keys
 Horcrux is a Python script that glues a few well-known, trustworthy tools
 together for "Voldemort-style" encrypted backups. You can encrypt new
 files at any time, but decrypting them again requires gathering `N` of `M`
-pieces of the master key.
+pieces of the master key. You pick `N` and `M`, and hide the pieces wherever
+you want.
 
 Set up your horcruxes today, and stop worrying about getting hacked or
-forgetting your password. Back them up in separate locations: put them
+forgetting your password! Back them up in separate locations: put them
 on CDs or thumbdrives, give them to friends, hide them in pictures or audio
 files, print them on metal plates in a vault guarded by a dragon. Be creative.
 
@@ -51,7 +52,7 @@ It also has several other advantages:
 * The time and effort needed to assemble the pieces offers some protection from
   being physically robbed, or (much more likely) losing money on impulsive crypto trades.
 
-* It can be both a backup and a will. Distribute shares to family members
+* It can be both a backup and a will. Distribute shares to trustees
   along with a `horcrux sign`ed document explaining what you want done when you die.
 
 
