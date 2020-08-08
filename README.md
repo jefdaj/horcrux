@@ -72,8 +72,8 @@ What it does is:
 
 3. Generate a separate sign/verify GPG keypair for signing the encrypted files.
    You can use your own existing GPG key for this instead if you want.
-   This lets your friends/family check that encrypted files are really from you
-   and were transferred correctly, even though they can't read them.
+   It lets your friends/family check that encrypted files are really from you
+   and were transferred correctly, even though they can't decrypt them.
 
 These files are created in the `my-first-horcruxes` directory:
 
