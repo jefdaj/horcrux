@@ -119,8 +119,8 @@ want to protect something important, like cryptocurrency or highly sensitive doc
 Computers get hacked all the time!
 
 
-TAILS install
--------------
+Generic install
+---------------
 
 Horcrux should work anywhere you can install the following apt dependencies or
 their equivalents:
@@ -133,15 +133,46 @@ their equivalents:
 * ssss
 * steghide (optional, for hide and unhide)
 * qrencode (optional, for QR codes)
+* expect (optional, for running the test scripts)
 
 You need root access for steghide, but only if you want to hide horcruxes in
 images or audio files.
+
+TAILS install
+-------------
 
 I recommend doing everything in [TAILS][8] because it's portable, relatively simple
 to set up, leaves no trace of your keys on disk, and will work on a different
 computer in the future. You'll need to:
 
-1. Download and install TAILS on a USB drive.
+1. Download and install TAILS on a USB drive. See [the site][9] for instructions.
+
+2. Reboot into TAILS, setting a temporary root password at the login screen.
+
+3. Create a persistent volume:
+
+     * `Applications` -> `System Tools` -> `Configure Persistent Volume`
+
+     * Enable at least `Personal Data`, `Additional Software`, and `Dotfiles`.
+       You probably want to *disable* `Network Connections`.
+
+4. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
+   put in the temporary root password, and run these commands:
+
+     ```
+     apt install -y gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
+     cd /live/persistent/TailsData_unlocked
+     git clone https://github.com/jefdaj/horcrux
+     ```
+
+   If prompted, say yes you want to make the new software persistent.
+   Assuming that went well, you should now be able to run the test scripts:
+
+     ```
+     cd horcrux
+     ./test.sh
+     
+     ```
 
 2. Install Horcrux: enable persistent storage with apt cache (see
    [these config files](./tails)), clone this repository into
@@ -169,7 +200,7 @@ give them just the horcrux itself if you plan to be around to decrypt it.
 
 
 Qubes install
-=============
+-------------
 
 Another good option for advanced users is [Qubes][6]. You shouldn't install it
 just for this, but if you use it already then a minimal offline VM (vault) is a
@@ -201,3 +232,4 @@ Litecoin: MBBgdzToFS3aY2yrqu4F42RLvoo8iw6cNF
 [6]: https://www.qubes-os.org
 [7]: https://www.qubes-os.org/doc/split-gpg/
 [8]: https://tails.boum.org/
+[9]: https://tails.boum.org/install/
