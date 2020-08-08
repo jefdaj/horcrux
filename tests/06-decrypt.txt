@@ -1,0 +1,18 @@
+trying to decrypt with 5 keys...
+verified signature for secret1.txt.gpg
+decrypted secret-decrypted.txt
+
+trying to decrypt with 4 keys...
+verified signature for secret1.txt.gpg
+decrypted secret-decrypted.txt
+
+trying to decrypt with 3 keys...
+verified signature for secret1.txt.gpg
+decrypted secret-decrypted.txt
+
+trying to decrypt with 2 keys...
+failed to reconstruct password
+
+trying to decrypt with 1 keys...
+failed to reconstruct password
+
