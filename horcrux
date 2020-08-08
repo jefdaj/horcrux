@@ -307,7 +307,7 @@ def find_files(working_dir, verify_key=None):
     }
     matches = {}
     for key in filters:
-        matches[key] = sorted(f for f in files if match(filters[key], f))
+        matches[key] = sorted(f for f in files if match(filters[key], basename(f)))
     if verify_key is not None:
         matches['verify_key'] = [verify_key]
     matches['shares'] = sorted(s for s in matches['shares'] if not s.endswith('.sig'))
