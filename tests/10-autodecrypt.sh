@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-mkdir lost-keys
+mkdir -p lost-keys
 mv my-first-horcrux/horcrux-* lost-keys/
 rm -f my-first-horcrux/secret1.txt.sig my-first-horcrux/secret-decrypted.txt
 
