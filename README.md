@@ -64,6 +64,8 @@ What it does is:
 
 1. Generate a long random master password and break it into 5 shares (aka horcruxes) using
    [Shamir's secret sharing scheme][4], with 3 of the 5 required to reconstruct it.
+   You can optionally pick part of the master password yourself to ensure that you
+   trust the randomness.
 
 2. Generate an encrypt/decrypt [GPG keypair][5] and shield the private (decrypt)
    key with the master password. This makes it possible to make new encrypted files
@@ -75,13 +77,14 @@ What it does is:
    It lets your friends/family check that encrypted files are really from you
    and were transferred correctly, even though they can't decrypt them.
 
-These files are created in the `my-first-horcruxes` directory:
+These files are created in the `my-first-horcruxes` folder:
 
 * `encrypt.key` for encrypting secrets (keep this)
 * `sign.key` for signing secrets (keep this)
 * `verify.key` for checking signatures (keep + distribute this)
 * `decrypt.key` for decrypting (keep + distribute this; it's locked with the horcruxes)
-* 5 `horcrux-XX.key` master password shares (distibute and/or keep them in separate locations)
+* 5 `horcrux-XX.key` master password shares, and 5 matching `.key.sig` signature files
+  (distibute and/or keep them in separate locations)
 
 Now all you have to do is distribute them, encrypt some stuff,
 and test that you really can bring any 3 horcruxes together to decrypt!
@@ -109,10 +112,10 @@ Instead you should take some common-sense security measures:
    Horcrux will prompt you to do that.
 
 3. If you can you should read the source code. It's about 400 lines of Python.
-   Alternatively, Horcrux can print out all the commands as it runs them (add `-v`).
-   (NOTE: partially implemented)
+   Alternatively, Horcrux can print out all the commands as it runs them.
    You could re-run them yourself separately.
    Then you only have to trust the TAILS + Debian developers.
+   (NOTE: not implemented yet)
 
 The offline environment might seem like too much work, but is necessary if you
 want to protect something important, like cryptocurrency or highly sensitive documents.
@@ -122,12 +125,12 @@ Computers get hacked all the time!
 Generic install
 ---------------
 
-Horcrux should work anywhere you can install the following apt dependencies or
+Horcrux should work anywhere you can install the following Debian packages or
 their equivalents:
 
 * gnupg
 * pwgen
-* python 2.7
+* python2 (2.7 ideally)
 * python-docopt
 * python-gnupg
 * ssss
@@ -135,42 +138,14 @@ their equivalents:
 * qrencode (optional, for QR codes)
 * expect (optional, for running the test scripts)
 
-You need root access for steghide, but only if you want to hide horcruxes in
-images or audio files.
+They're easy to get in Debian, Ubuntu, or a similar distro:
 
-TAILS install
--------------
+     apt install gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
 
-I recommend doing everything in [TAILS][8] because it's portable, relatively simple
-to set up, leaves no trace of your keys on disk, and will work on a different
-computer in the future. You'll need to:
+Once you have the dependencies, clone this repository and check that it works
+with the included test scripts. It should look something like this:
 
-1. Download and install TAILS on a USB drive. See [the site][9] for instructions.
-
-2. Reboot into TAILS, setting a temporary root password at the login screen.
-
-3. Create a persistent volume:
-
-     * `Applications` -> `System Tools` -> `Configure Persistent Volume`
-
-     * Enable at least `Personal Data`, `Additional Software`, and `Dotfiles`.
-       You probably want to *disable* `Network Connections`.
-
-4. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
-   put in the temporary root password, and run these commands. You can open `Tor Browser`
-   and go to this page to copy + paste if you like.
-
-     ```
-     cd /live/persistent/TailsData_unlocked
      git clone https://github.com/jefdaj/horcrux
-     echo 'export PATH=/live/persistence/TailsData_unlocked/horcrux:$PATH' >> /home/amnesia/.bashrc
-     apt install -y gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
-     ```
-
-   If prompted, say yes you want to make the new software persistent.
-   Assuming that went well, you should now be able to run the test scripts:
-
-     ```
      cd horcrux
      ./test.sh
      running 00-deps.sh... ok
@@ -184,24 +159,60 @@ computer in the future. You'll need to:
      running 08-unhide.sh... ok
      running 09-autoverify.sh... ok
      running 10-autodecrypt.sh... ok
+
+Note that for some reason you need root access to use steghide. Without that
+the optional `hide` and `unhide` commands won't work and their tests will fail.
+
+
+TAILS install
+-------------
+
+I recommend doing everything in [TAILS][8] because it's portable, relatively simple
+to set up, leaves no trace of your keys on disk, and will work on a different
+computer in the future. You'll need to:
+
+1. Download and install TAILS on a USB drive. See [the site][9] for instructions.
+
+2. Reboot into TAILS, setting a temporary root password at the login screen.
+   Connect to your wifi in the upper right corner menu.
+
+3. Create a persistent volume:
+
+     * `Applications` -> `System Tools` -> `Configure Persistent Volume`
+
+     * Enable at least `Personal Data`, `Additional Software`, and `Dotfiles`.
+       You probably want to disable `Network Connections` to prevent auto-connecting
+       to your wifi later.
+
+4. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
+   put in the temporary root password, and run these commands. You can open `Tor Browser`
+   and go to this page to copy + paste them if you like.
+
      ```
+     cd /live/persistent/TailsData_unlocked
+     git clone https://github.com/jefdaj/horcrux
+     mkdir dotfiles
+     mv /home/amnesia/.bashrc dotfiles/
+     echo 'export PATH=/live/persistence/TailsData_unlocked/horcrux:$PATH' >> dotfiles/.bashrc
+     chown amnesia:users horcrux dotfiles -R
+     apt install gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
+     ```
+
+   When prompted, confirm that you do want to make the new software persistent too.
+   Then check that the packages appear in
+   `/live/persistence/TailsData_unlocked/live-additional-software.conf`.
+   Assuming that all went well, you should now be able to run the test scripts.
 
 5. Reboot one more time so you can `Disable all networking` at the startup
    screen before generating your real keys.
 
-6. Practice moving your horcrux keys to separate media, destroying the originals,
-   and putting them back together to unlock your data. Convince yourself it will
-   definitely work when you need it.
-
-7. Delete the original secrets! This is emotionally hard, but repeating step 5
-   again should help. You might want to wait a week or a month, then make sure
-   your horcruxes work, then finally delete the original secrets.
-
-You can also repeat these steps to make a "Horcrux live USB" for friends and
-family. Copy the `verify.desktop` and `decrypt.desktop` launchers into their
-`~/Persistent` so they can drag the backup folder onto them to verify and/or
-decrypt the backups, depending which keys you give them. Of course, you can
-give them just the horcrux itself if you plan to be around to decrypt it.
+6. This last step is optional, but good if you plan to give copies of TAILS to
+   other people as part of a will. The [tails folder in this repo](./tails/)
+   contains two Linux application launcher shortcuts (the `.desktop` files). You
+   can put them in `/home/amnesia/Persistent` and use them to do the `verify` and
+   `decrypt` operations without any command line knowledge.  Just tell your
+   trustees/family/friends to put all the keys and backups in together in the same
+   folder, then drag the folder onto one of the `.desktop` files.
 
 
 Qubes install
@@ -214,6 +225,32 @@ reasonable place to keep the Horcrux program along with your sign, encrypt, and
 setup has the advantage of making it easier to horcrux-encrypt your files,
 because you don't need to reboot into TAILS each time. It may also work with
 [Qubes Split GPG][7], although I haven't tried.
+
+
+Basic usage
+-----------
+
+After checking that the test scripts work, play around with 
+
+1. Generate your keys with a command like `horcrux setup N M my-first-horcruxes`,
+   where "N of M" is how many horcruxes you want to be required to unlock everything
+   and how many you want total. For example 2 of 3, 3 of 5, or 7 of 10 would be
+   reasonable choices.
+
+6. Practice moving your horcrux keys to separate media, encrypting things,
+   destroying the originals, and putting the horcruxes back together to
+   recreate the originals. Convince yourself it will definitely work when you need
+   it.
+
+7. Delete the original secrets! This is emotionally hard, but repeating step 5
+   again should help. You might want to wait a week or a month, then make sure
+   your horcruxes work, then finally delete the original secrets.
+
+You can also repeat these steps to make a "Horcrux live USB" for friends and
+family. Copy the `verify.desktop` and `decrypt.desktop` launchers into their
+`~/Persistent` so they can drag the backup folder onto them to verify and/or
+decrypt the backups, depending which keys you give them. Of course, you can
+give them just the horcrux itself if you plan to be around to decrypt it.
 
 
 Donations
