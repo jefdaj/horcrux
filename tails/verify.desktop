@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=verify
-Comment=signed, updatable secrets read with N of M optionally hidden keys
+Comment=immortality for your encryption keys
 Exec=gnome-terminal -e 'bash -c "sudo /live/persistence/TailsData_unlocked/horcrux/horcrux autoverify %f; read -n1"'
 Icon=utilities-terminal
 Terminal=false
