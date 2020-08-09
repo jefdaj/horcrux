@@ -202,6 +202,7 @@ computer in the future. You'll need to:
    Then check that the packages appear in
    `/live/persistence/TailsData_unlocked/live-additional-software.conf`.
    Assuming that all went well, you should now be able to run the test scripts.
+   (See the Generic Install above)
 
 5. Reboot one more time so you can `Disable all networking` at the startup
    screen before generating your real keys.
@@ -211,8 +212,8 @@ computer in the future. You'll need to:
    contains two Linux application launcher shortcuts (the `.desktop` files). You
    can put them in `/home/amnesia/Persistent` and use them to do the `verify` and
    `decrypt` operations without any command line knowledge.  Just tell your
-   trustees/family/friends to put all the keys and backups in together in the same
-   folder, then drag the folder onto one of the `.desktop` files.
+   trustees/family/friends to put all the keys and backups together in the same
+   folder, then drag the folder onto one of the `.desktop` files to do the magic.
 
 
 Qubes install
@@ -227,24 +228,25 @@ because you don't need to reboot into TAILS each time. It may also work with
 [Qubes Split GPG][7], although I haven't tried.
 
 
-Basic usage
+Basic setup
 -----------
 
-After checking that the test scripts work, play around with 
+After checking that the test scripts work, play around with the commands:
 
-1. Generate your keys with a command like `horcrux setup N M my-first-horcruxes`,
+1. Generate some keys with a command like `horcrux setup N M my-first-horcruxes`,
    where "N of M" is how many horcruxes you want to be required to unlock everything
-   and how many you want total. For example 2 of 3, 3 of 5, or 7 of 10 would be
-   reasonable choices.
+   out of how many total. For example 2 of 3, 3 of 5, or 7 of 10 would be
+   reasonable choices. Remember to delete these practice ones when ready to do it
+   for real, so you can't mix them up.
 
-6. Practice moving your horcrux keys to separate media, encrypting things,
+2. Practice moving your horcrux keys to separate media, encrypting things,
    destroying the originals, and putting the horcruxes back together to
    recreate the originals. Convince yourself it will definitely work when you need
    it.
 
-7. Delete the original secrets! This is emotionally hard, but repeating step 5
-   again should help. You might want to wait a week or a month, then make sure
-   your horcruxes work, then finally delete the original secrets.
+3. Delete the original secrets! This is emotionally hard, but repeating step 2
+   a few times should help. You might want to wait a week or a month, then make
+   sure your horcruxes still work, then finally delete the original secrets.
 
 You can also repeat these steps to make a "Horcrux live USB" for friends and
 family. Copy the `verify.desktop` and `decrypt.desktop` launchers into their
