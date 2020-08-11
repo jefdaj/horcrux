@@ -137,6 +137,7 @@ their equivalents:
 * steghide (optional, for hide and unhide)
 * qrencode (optional, for QR codes)
 * expect (optional, for running the test scripts)
+* unzip (for extracting the code)
 
 They're easy to get in Debian, Ubuntu, or a similar distro:
 
@@ -189,15 +190,16 @@ computer in the future. You'll need to:
    In the next step we'll move it into place and install dependencies.
 
 5. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
-   put in the temporary root password, and run these commands. You can copy +
+   put in the temporary root password, and run these commands one at a time. You can copy +
    paste them from here if you like. When prompted, confirm that you want to make
    the software persistent.
 
      ```
-     apt install -y gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
+     apt install -y gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect unzip
      cd /live/persistence/TailsData_unlocked
      unzip /home/amnesia/Tor\ Browser/horcrux-*.zip
      mv horcrux-* horcrux
+     chown amnesia:amnesia horcrux -R
      mv /home/amnesia/.bashrc dotfiles/
      echo 'export PATH=/live/persistence/TailsData_unlocked/horcrux:$PATH' >> dotfiles/.bashrc
      ```
@@ -206,7 +208,8 @@ computer in the future. You'll need to:
    (See the Generic Install above)
 
 5. Reboot one more time so you can `Disable all networking` at the startup
-   screen before generating your real keys.
+   screen before generating your real keys. To check that horcrux installed correctly,
+   open a new (non-root) terminal and type `horcrux -h`. You should see the help message.
 
 6. This last step is optional, but good if you plan to give copies of TAILS to
    other people as part of a will. The [tails folder in this repo](./tails/)
