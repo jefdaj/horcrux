@@ -184,23 +184,24 @@ computer in the future. You'll need to:
        You probably want to disable `Network Connections` to prevent auto-connecting
        to your wifi later.
 
-4. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
-   put in the temporary root password, and run these commands. You can open `Tor Browser`
-   and go to this page to copy + paste them if you like.
+4. Open `Applications` -> `Tor Browser` and navigate to this site (`https://github.com/jefdaj/horcrux`).
+   Click `Code` -> `Download ZIP` to download the source code.
+   In the next step we'll move it into place and install dependencies.
+
+5. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
+   put in the temporary root password, and run these commands. You can copy +
+   paste them from here if you like. When prompted, confirm that you want to make
+   the software persistent.
 
      ```
-     cd /live/persistent/TailsData_unlocked
-     git clone https://github.com/jefdaj/horcrux
-     mkdir dotfiles
+     apt install -y gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
+     cd /live/persistence/TailsData_unlocked
+     unzip /home/amnesia/Tor\ Browser/horcrux-*.zip
+     mv horcrux-* horcrux
      mv /home/amnesia/.bashrc dotfiles/
      echo 'export PATH=/live/persistence/TailsData_unlocked/horcrux:$PATH' >> dotfiles/.bashrc
-     chown amnesia:users horcrux dotfiles -R
-     apt install gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
      ```
 
-   When prompted, confirm that you do want to make the new software persistent too.
-   Then check that the packages appear in
-   `/live/persistence/TailsData_unlocked/live-additional-software.conf`.
    Assuming that all went well, you should now be able to run the test scripts.
    (See the Generic Install above)
 
