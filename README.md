@@ -20,7 +20,15 @@ amount of money, spare a thought for the little project that keeps it from
 actually being scary!
 
 Check out the rest of this readme, [usage.txt][1], or [the test scripts][2] to get started.
-I'm also working on a series of short video tutorials.
+I'm also working on a series of short video tutorials:
+
+* [Horcrux 1/7: the master plan](https://vimeo.com/446693379)
+
+* Horcrux 2/7: TAILS install
+
+* [Horcrux 3/7: setup, encrypt, sign, distribute](https://vimeo.com/448105867)
+
+* [Horcrux 4/7: verify, decrypt](https://vimeo.com/448106558)
 
 
 I'm just a normal person. Why do I need that?
