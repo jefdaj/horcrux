@@ -19,8 +19,7 @@ bottom). All I ask is during the next bull run, if you suddenly have a scary
 amount of money, spare a thought for the little project that keeps it from
 actually being scary!
 
-Check out the rest of this readme, [usage.txt][1], or [the test scripts][2] to get started.
-I'm also working on a series of short video tutorials:
+These videos are probably the best starting point:
 
 * [Horcrux 1/7: the master plan](https://vimeo.com/446693379)
 
@@ -30,6 +29,7 @@ I'm also working on a series of short video tutorials:
 
 * [Horcrux 4/7: verify, decrypt](https://vimeo.com/448106558)
 
+See also the rest of this readme, [usage.txt][1], or [the test scripts][2].
 
 I'm just a normal person. Why do I need that?
 ---------------------------------------------
