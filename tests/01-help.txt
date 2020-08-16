@@ -1,4 +1,4 @@
-Horcrux: immortality for your encryption keys
+Horcrux: immortality for your encrypted backups
 
 Usage:
   horcrux  -h
