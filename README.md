@@ -1,5 +1,5 @@
-Horcrux: immortality for your encryption keys
-=============================================
+Horcrux: immortality for your encrypted backups
+===============================================
 
 <img src="assets/logo.png" width="700" align="center">
 
