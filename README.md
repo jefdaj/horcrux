@@ -272,13 +272,13 @@ Donations
 
 I accept donations of any other crypto too! Just email or open an issue.
 
-Cardano: addr1qxj9jgy6q2djt9qqd3qvccdwp6hs0h9rdh4jxa39qwp384d6n2up76s6lej6vqv2yatkvgrp6vddzj0qfupjepsqvcusqg3r69
-
-Bitcoin: 1PEhbpXYrtwK4JWfrrhCcWt4sgxijc9CT7
-
-Bitcoin Cash: 1EybRPMNwW5EnP7rGtMGnP1BZzn284b2vi
-
-Litecoin: MBBgdzToFS3aY2yrqu4F42RLvoo8iw6cNF
+| Coin | Address |
+| :--- | :--- |
+| Bitcoin | `1PEhbpXYrtwK4JWfrrhCcWt4sgxijc9CT7` |
+| Bitcoin Cash | `1EybRPMNwW5EnP7rGtMGnP1BZzn284b2vi` |
+| Cardano | `addr1qxj9jgy6q2djt9qqd3qvccdwp6hs0h9rdh4jxa39qwp384d6n2up76s6lej6vqv2yatkvgrp6vddzj0qfupjepsqvcusqg3r69` |
+| Ethereum | `0x814CE5693C2250fcc3ef26f13C22112B32b32943` |
+| Litecoin | `MBBgdzToFS3aY2yrqu4F42RLvoo8iw6cNF` |
 
 
 [1]: ./usage.txt
