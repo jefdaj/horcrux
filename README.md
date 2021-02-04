@@ -23,7 +23,7 @@ These videos are probably the best starting point:
 
 * [Horcrux 1/7: the master plan](https://vimeo.com/446693379)
 
-* [Horcrux 2/7: TAILS install](https://vimeo.com/451246720)
+* [Horcrux 2/7: TAILS install](https://vimeo.com/451246720) (skip this one unless you know you want to bother installing it)
 
 * [Horcrux 3/7: setup, encrypt, sign, distribute](https://vimeo.com/448105867)
 
