@@ -6,7 +6,7 @@ check_dep() {
 
 echo "checking for dependencies..."
 
-check_dep python2
+check_dep python3
 check_dep horcrux
 check_dep steghide
 check_dep ssss-split

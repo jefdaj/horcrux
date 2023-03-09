@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # TODO make permissions accessible to non-root user
 # TODO if it exists, pick up HORCRUX_KEY_DIR

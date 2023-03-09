@@ -31,7 +31,16 @@
 
         env = machNix.mkPython {
           inherit requirements;
-          packagesExtra = [ pkgs.openssl ];
+          packagesExtra = with pkgs; [
+            expect
+            gnupg
+            openssl
+            pwgen
+            qrencode
+            ssss
+            steghide
+            unzip
+          ];
         };
 
         app = machNix.buildPythonApplication {

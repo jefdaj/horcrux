@@ -1,18 +1,5 @@
-python3Packages:
-- docopt
-- python-gnupg
-
-system packages:
-- expect
-- gnupg (other options?)
-- pwgen (pwgen-secure?)
-- qrencode
-- ssss
-- steghide
-- unzip
-
-dependencies:
-- python2 (2.7 ideally)
+old dependencies:
+x python2 (2.7 ideally)
 x expect (optional, for running the test scripts)
 x gnupg
 x pwgen
@@ -22,3 +9,17 @@ x qrencode (optional, for QR codes)
 x ssss
 x steghide (optional, for hide and unhide)
 x unzip (for extracting the code)
+
+new system packages:
+- expect
+- gnupg (other options?)
+- pwgen (pwgen-secure?)
+- qrencode
+- ssss
+- steghide
+- unzip
+- python3
+
+new python3Packages:
+- docopt
+- python-gnupg
