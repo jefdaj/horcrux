@@ -30,7 +30,7 @@ def create_password(nchars, verbose):
     user_chars = input(msg).replace('\n', '')[:65]
     nchars = nchars - len(user_chars)
     cmd = ['pwgen', '--secure', str(nchars), '1']
-    passwd = check_output(cmd).rstrip('\n') + user_chars
+    passwd = check_output(cmd, encoding='UTF-8').rstrip('\n') + user_chars
     return passwd
 
 def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_dir, verbose):
@@ -38,10 +38,18 @@ def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_d
         msg = 'splitting the master password into %d shares (horcruxes), any %d of which can reconstruct it'
         print(msg % (nshares, threshold))
     # TODO -w token? -x (hex mode)? small or variable-length strings instead of 1024?
-    cmd = ['ssss-split', '-t', str(threshold), '-n', str(nshares), '-s', '1024']
-    proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    # TODO why does setting -s 1024 cause 'FATAL: input string too long.' now??
+    cmd = ['ssss-split', '-t', str(threshold), '-n', str(nshares)]
+    proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
     (out, err) = proc.communicate(decrypt_passwd)
-    shares = out.split('\n')[1:-1]
+    if verbose and len(err) > 0:
+        print("stderr:")
+        print(err)
+    # if verbose:
+    #     print("stdout:")
+    #     print(out)
+    shares = [l for l in out.split('\n') if len(l) > 0]
+    # print(shares)
     assert len(shares) == nshares
     for n in range(1, nshares+1):
         path = join(output_dir, 'horcrux-%.2d.key' % n)
@@ -119,7 +127,7 @@ def setup(gpg, threshold, nshares, output_dir, verbose=False, sign_key=None):
 def import_key(gpg, filename, verbose):
     if verbose:
         print('importing gpg public key %s' % filename)
-    with open(filename, 'rb') as f:
+    with open(filename, 'r') as f:
         gpg.import_keys(f.read())
 
 # TODO catch gpg errors here
@@ -144,7 +152,7 @@ def encrypt_file(gpg, recipient, before_path, after_path, verbose):
     if verbose:
         print('encrypting %s to "%s" (output in %s)' \
                % (before_path, recipient, after_path))
-    with open(before_path, 'rb') as f:
+    with open(before_path, 'r') as f:
         status = gpg.encrypt_file(f, recipients=[recipient],
                                   output=after_path, always_trust=True)
     if not status.ok:
@@ -175,7 +183,7 @@ def verify(gpg, verify_key, signed_file, verbose):
         signature = asc_file
     else:
         print('ERROR! missing signature for %s' % signed_file)
-    with open(signature, 'rb') as f:
+    with open(signature, 'r') as f:
         success = gpg.verify_file(f, data_filename=signed_file)
     if success:
         print('verified signature for %s' % basename(signed_file))
@@ -230,7 +238,7 @@ def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
                      basename(decrypt_key),
                      basename(outfile)))
     import_key(gpg, decrypt_key, verbose)
-    with open(secretfile, 'rb') as f:
+    with open(secretfile, 'r') as f:
         status = gpg.decrypt_file(f, passphrase=password, output=outfile)
     if not status.ok:
         print(status.status)
@@ -253,7 +261,7 @@ def sha256sum(filename, verbose):
     if verbose:
         print('calculating sha256sum of %s' % filename)
     cmd = ['sha256sum', filename]
-    sha = check_output(cmd).split()[0]
+    sha = check_output(cmd, encoding='UTF-8').split()[0]
     return sha
 
 def hide(file_to_hide, cover_file, outfile, passphrase, verbose):
