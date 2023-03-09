@@ -183,7 +183,7 @@ def verify(gpg, verify_key, signed_file, verbose):
         signature = asc_file
     else:
         print('ERROR! missing signature for %s' % signed_file)
-    with open(signature, 'r') as f:
+    with open(signature, 'rb') as f:
         success = gpg.verify_file(f, data_filename=signed_file)
     if success:
         print('verified signature for %s' % basename(signed_file))
@@ -200,7 +200,7 @@ def recreate_password(threshold, share_paths, stego_pass, verbose):
     cmd = ['ssss-combine', '-t', str(threshold)]
     shares = '' # newline-separated list of shares
     for path in share_paths:
-        with open(path, 'r') as f:
+        with open(path, 'rb') as f:
             shares += f.read()
     proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     (out, err) = proc.communicate(shares)
@@ -238,7 +238,7 @@ def decrypt_file(gpg, decrypt_key, secretfile, password, outfile, verbose):
                      basename(decrypt_key),
                      basename(outfile)))
     import_key(gpg, decrypt_key, verbose)
-    with open(secretfile, 'r') as f:
+    with open(secretfile, 'rb') as f:
         status = gpg.decrypt_file(f, passphrase=password, output=outfile)
     if not status.ok:
         print(status.status)
