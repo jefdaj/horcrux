@@ -11,6 +11,7 @@ for script in *.sh; do
   echo -n "running ${script}... "
   . "$script" 2>&1 > "$log_file" && echo "ok" || echo "ERROR"
   cd "$HORCRUX_DIR"/tests
+  sleep 1
 done
 
 # remove test dirs at the end rather than one at a time,

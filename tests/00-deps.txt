@@ -1,5 +1,5 @@
 checking for dependencies...
-python2 is installed
+python3 is installed
 horcrux is installed
 steghide is installed
 ssss-split is installed
