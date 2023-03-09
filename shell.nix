@@ -27,4 +27,7 @@ let
 
 in pkgs.mkShell {
   buildInputs = devDeps;
+  shellHook = ''
+    export PATH=$PWD:$PATH
+  '';
 }
