@@ -158,8 +158,8 @@ def sign_file(gpg, keyname, sign_passwd, file_to_sign, verbose):
     outfile = file_to_sign + '.sig'
     if verbose:
         print('signing %s with "%s" key (output in %s)' % (file_to_sign, keyname, outfile))
-    with open(file_to_sign, 'r') as f:
-        signed = gpg.sign_file(f, keyid=keyname, detach=True, passphrase=sign_passwd)
+    with open(file_to_sign, 'rb') as f:
+        signed = gpg.sign_file(f, keyid=keyname, detach=True, passphrase=sign_passwd, binary=True)
     with open(outfile, 'wb') as f:
         f.write(signed.data)
 
@@ -206,6 +206,7 @@ def verify(gpg, verify_key, signed_file, verbose):
         signature = asc_file
     else:
         print('ERROR! missing signature for %s' % signed_file)
+    # turns out the signature IS bad... next step figure out why
     with open(signature, 'rb') as f:
         success = gpg.verify_file(f, data_filename=signed_file)
     if success:
