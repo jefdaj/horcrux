@@ -1,8 +1,10 @@
 trying to decrypt with 1 keys...
 failed to reconstruct master password
+(this is expected)
 
 trying to decrypt with 2 keys...
 failed to reconstruct master password
+(this is expected)
 
 trying to decrypt with 3 keys...
 verified signature for secret1.txt.gpg

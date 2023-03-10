@@ -2,18 +2,19 @@ spawn horcrux setup 3 5 my-first-horcrux
 enter up to 64 alphanumeric chars to mix in to the master password: 0r9epwi;tkqwupuoi;qer]asdf
 enter a password to shield the signing key: 
 confirm password to shield the signing key: 
+
    57 my-first-horcrux/decrypt.key
    29 my-first-horcrux/encrypt.key
     1 my-first-horcrux/horcrux-01.key
-   17 my-first-horcrux/horcrux-01.key.sig
+    4 my-first-horcrux/horcrux-01.key.sig
     1 my-first-horcrux/horcrux-02.key
-   17 my-first-horcrux/horcrux-02.key.sig
+    5 my-first-horcrux/horcrux-02.key.sig
     1 my-first-horcrux/horcrux-03.key
-   17 my-first-horcrux/horcrux-03.key.sig
+    6 my-first-horcrux/horcrux-03.key.sig
     1 my-first-horcrux/horcrux-04.key
-   17 my-first-horcrux/horcrux-04.key.sig
+    4 my-first-horcrux/horcrux-04.key.sig
     1 my-first-horcrux/horcrux-05.key
-   17 my-first-horcrux/horcrux-05.key.sig
+    4 my-first-horcrux/horcrux-05.key.sig
    57 my-first-horcrux/sign.key
    29 my-first-horcrux/verify.key
-  262 total
+  200 total
