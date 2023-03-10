@@ -53,9 +53,8 @@ in pkgs.stdenv.mkDerivation rec {
 
   '';
 
-  # doCheck = true;
-  # checkPhase = ''
-  #   source $stdenv/setup
-  #   $out/test/test.sh
-  # '';
+  doInstallCheck = true;
+  installCheckPhase = ''
+    $out/bin/horcrux-test
+  '';
 }

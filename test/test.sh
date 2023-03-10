@@ -16,7 +16,7 @@ for script in "$SRC_DIR"/test-*-*.sh; do
 	log_file="$(basename ${script/.sh/.txt})"
 	echo -n "running $(basename $script)... "
   bash "$script" 2>&1 > "$log_file"; script_code=$?
-  grep ERROR "$log_file" && break || true
+  grep ERROR "$log_file" && exit 1 || true
   [[ $script_code == 0 ]] && echo "ok" || break
 done
 
