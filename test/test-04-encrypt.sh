@@ -9,4 +9,5 @@ send -- "testpass1\n"
 expect eof
 END
 sync
+echo
 file secret1.txt*

@@ -10,4 +10,5 @@ send -- "testpass1\n"
 expect eof
 END
 sync
+echo
 wc -l secret1.txt*
