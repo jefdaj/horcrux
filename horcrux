@@ -18,7 +18,7 @@ Usage:
 Options:
   -h --help        Show this text.
   -v --verbose     Print pedantic but human-readable messages.
-  -d --debug       Print debugging messages. **WARNING: PRINTS MASTER PASSWORD!**
+  -d --debug       Print debugging messages. *** WARNING: PRINTS MASTER PASSWORD! ***
   <output-dir>     Where to put the generated keys [default: .]
   -s <sign-key>    Use an existing PGP private key as your signing key
   -p <verify-key>  Use an existing PGP public key as your verification key
@@ -61,7 +61,6 @@ def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_d
     if verbose:
         msg = 'splitting the master password into %d shares (horcruxes), any %d of which can reconstruct it'
         print(msg % (nshares, threshold))
-    # TODO -w token? -x (hex mode)? small or variable-length strings instead of 1024?
     # TODO why does setting -s 1024 cause 'FATAL: input string too long.' now??
     cmd = ['ssss-split', '-t', str(threshold), '-n', str(nshares)]
     proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
@@ -69,11 +68,12 @@ def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_d
     if verbose and len(err) > 0:
         print("stderr:")
         print(err)
-    # if verbose:
-    #     print("stdout:")
-    #     print(out)
+    if verbose > 1:
+        print("stdout:")
+        print(out)
     shares = [l for l in out.split('\n') if len(l) > 0]
-    # print(shares)
+    if verbose > 1:
+        print(shares)
     assert len(shares) == nshares
     for n in range(1, nshares+1):
         path = join(output_dir, 'horcrux-%.2d.key' % n)
@@ -81,10 +81,8 @@ def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_d
             print('writing %s' % path)
         share = shares[n-1]
         # assert len(share) == 258 # TODO not needed if we test round trip later?
-        # TODO binary write here? probably not
         with open(path, 'w') as f:
             f.write('%s\n' % share)
-        # TODO do I need to take a hash first and sign that or something?
         sign_file(gpg, 'verify', sign_passwd, path, verbose) # TODO have to adjust 'verify' to the keyid?
 
 def create_keyring(home, verbose):
@@ -228,11 +226,7 @@ def verify(gpg, verify_key, signed_file, verbose):
 # decrypt #
 ###########
 
-# TODO interesting, it actually does work at the right threshold but doesn't know it succeeded?
-
-# TODO wait, can you just use the exit code? lol
 def recreate_succeeded(stdout, stderr):
-    # print('stdout: "%s"' % stdout)
     if len(stdout) < 128:
         return False
     if 'FATAL:' in stderr:
@@ -254,11 +248,9 @@ def recreate_password(threshold, share_paths, stego_pass, verbose):
         print(f"shares: '{shares}'")
     proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
     (out, err) = proc.communicate(shares)
-    proc.wait() # TODO remove?
-    # TODO if proc.returncode == 0:?
+    # TODO why doesn't proc.returncode == 0 work?
     if recreate_succeeded(out, err):
         passwd = out.strip()
-        # print('recreate_succeeded: yes')
         if verbose:
             print('success!')
         if verbose > 1:
@@ -422,12 +414,11 @@ def main(args):
         verbose = 1
     else:
         verbose = 0
-    # verbose = bool(args['--verbose'])
-    # with tempfile.TemporaryDirectory() as home:
     home = mkdtemp() # TODO use a context or handle exceptions
     gpg = create_keyring(home, verbose)
     
-    # print('args: %s' % args
+    if verbose > 1:
+        print('args: %s' % args)
 
     if args['setup']:
         output_dir = args['<output-dir>']
