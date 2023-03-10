@@ -80,6 +80,7 @@ def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_d
             print('writing %s' % path)
         share = shares[n-1]
         # assert len(share) == 258 # TODO not needed if we test round trip later?
+        # TODO binary write here? probably not
         with open(path, 'w') as f:
             f.write('%s\n' % share)
         # TODO do I need to take a hash first and sign that or something?
@@ -175,6 +176,7 @@ def encrypt_file(gpg, recipient, before_path, after_path, verbose):
     if verbose:
         print('encrypting %s to "%s" (output in %s)' \
                % (before_path, recipient, after_path))
+    # TODO is this one ok without binary?
     with open(before_path, 'r') as f:
         status = gpg.encrypt_file(f, recipients=[recipient],
                                   output=after_path, always_trust=True)
@@ -195,6 +197,9 @@ def encrypt(gpg, encrypt_key, sign_key, before, after, verbose):
 ##########
 
 def verify(gpg, verify_key, signed_file, verbose):
+    if not exists(signed_file):
+        print("WARNING: can't verify %s because the file is missing" % basename(signed_file))
+        return
     import_key(gpg, verify_key, verbose)
     if verbose:
         print('verifying %s with %s' % (signed_file, verify_key))
@@ -218,23 +223,54 @@ def verify(gpg, verify_key, signed_file, verbose):
 # decrypt #
 ###########
 
+# TODO interesting, it actually does work at the right threshold but doesn't know it succeeded?
+
+# TODO wait, can you just use the exit code? lol
+def recreate_succeeded(stdout, stderr):
+    # print('stdout: "%s"' % stdout)
+    if len(stdout) < 128:
+        return False
+    if 'FATAL:' in stderr:
+        return False
+    if stdout.count('.') > 0:
+        return False
+    if len(stdout.strip()) == 128:
+        return True
+
 def recreate_password(threshold, share_paths, stego_pass, verbose):
     if verbose:
         print('trying to reconstruct master password from %d shares...' % threshold,)
     cmd = ['ssss-combine', '-t', str(threshold)]
     shares = '' # newline-separated list of shares
     for path in share_paths:
-        with open(path, 'rb') as f:
-            shares += f.read()
-    proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        with open(path, 'r') as f:
+            shares += f.read() #.decode('utf-8')
+    # print(f"shares: '{shares}'")
+    proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
     (out, err) = proc.communicate(shares)
-    passwd = err.split(':')[1].strip()
-    if len(passwd) == 128:
+    proc.wait() # TODO remove?
+    # passwd = err.split(':')[1].strip()
+    # proc = run(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
+    # proc.wait()
+    # breakpoint()
+    # out = proc.stdout
+    # err = proc.stderr
+    # print(locals())
+    # TODO be more careful here, catching info from stderr too?
+    # TODO and raise an exception if it failed
+    # if proc.returncode == 0:
+    if recreate_succeeded(out, err):
+        passwd = out.strip()
+        # print('recreate_succeeded: yes')
         if verbose:
             print('success!')
+            print(f"passwd: '{passwd}'")
     else:
+        # print('recreate_succeeded: no')
         if verbose:
             print('fail')
+            print(f"out: {out}")
+            print(f"err: {err}")
         raise SystemExit(1)
     return passwd
 
