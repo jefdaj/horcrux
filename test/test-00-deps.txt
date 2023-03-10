@@ -1,6 +1,6 @@
 checking for dependencies...
 python3 is installed
 horcrux is installed
-ERROR! missing steghide
-ERROR! missing ssss-split
-ERROR! missing expect
+steghide is installed
+ssss-split is installed
+expect is installed
