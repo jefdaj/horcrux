@@ -3,5 +3,5 @@ enter a password to unlock sign.key:
 
 secret1.txt:         ASCII text
 secret1.txt.gpg:     PGP message Public-Key Encrypted Session Key (old)
-secret1.txt.gpg.sig: data
-secret1.txt.sig:     data
+secret1.txt.gpg.sig: PGP signature Signature (old)
+secret1.txt.sig:     PGP signature Signature (old)
