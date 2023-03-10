@@ -5,19 +5,20 @@ Horcrux: immortality for your encrypted backups
 
 Usage:
   horcrux  -h
-  horcrux [-v] autoverify  [-p <verify-key>] [<working-dir>]
-  horcrux [-v] autodecrypt [-p <verify-key>] [<working-dir>]
-  horcrux [-v] setup   <threshold> <shares> [-s <sign-key>] [<output-dir>]
-  horcrux [-v] sign    <sign-key> <file-to-sign>
-  horcrux [-v] encrypt <encrypt-key> <sign-key> <file-to-encrypt> <output-path>
-  horcrux [-v] verify  <verify-key> <signed-file>
-  horcrux [-v] decrypt <decrypt-key> <verify-key> <locked-file> <output-path> <share>...
-  horcrux [-v] hide    <decrypt-key> <file-to-hide> <cover-file> <output-path>
-  horcrux [-v] unhide  <decrypt-key> <stego-file> <output-path>
+  horcrux [-vd] autoverify  [-p <verify-key>] [<working-dir>]
+  horcrux [-vd] autodecrypt [-p <verify-key>] [<working-dir>]
+  horcrux [-vd] setup   <threshold> <shares> [-s <sign-key>] [<output-dir>]
+  horcrux [-vd] sign    <sign-key> <file-to-sign>
+  horcrux [-vd] encrypt <encrypt-key> <sign-key> <file-to-encrypt> <output-path>
+  horcrux [-vd] verify  <verify-key> <signed-file>
+  horcrux [-vd] decrypt <decrypt-key> <verify-key> <locked-file> <output-path> <share>...
+  horcrux [-vd] hide    <decrypt-key> <file-to-hide> <cover-file> <output-path>
+  horcrux [-vd] unhide  <decrypt-key> <stego-file> <output-path>
 
 Options:
   -h --help        Show this text.
-  -v --verbose     Print progress messages.
+  -v --verbose     Print pedantic but human-readable messages.
+  -d --debug       Print debugging messages. **WARNING: PRINTS MASTER PASSWORD!**
   <output-dir>     Where to put the generated keys [default: .]
   -s <sign-key>    Use an existing PGP private key as your signing key
   -p <verify-key>  Use an existing PGP public key as your verification key
@@ -249,33 +250,25 @@ def recreate_password(threshold, share_paths, stego_pass, verbose):
     for path in share_paths:
         with open(path, 'r') as f:
             shares += f.read() #.decode('utf-8')
-    # print(f"shares: '{shares}'")
+    if verbose > 1:
+        print(f"shares: '{shares}'")
     proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
     (out, err) = proc.communicate(shares)
     proc.wait() # TODO remove?
-    # passwd = err.split(':')[1].strip()
-    # proc = run(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
-    # proc.wait()
-    # breakpoint()
-    # out = proc.stdout
-    # err = proc.stderr
-    # print(locals())
-    # TODO be more careful here, catching info from stderr too?
-    # TODO and raise an exception if it failed
-    # if proc.returncode == 0:
+    # TODO if proc.returncode == 0:?
     if recreate_succeeded(out, err):
         passwd = out.strip()
         # print('recreate_succeeded: yes')
         if verbose:
             print('success!')
-            # TODO allow this but have a debug flag for it!
-            # print(f"passwd: '{passwd}'")
+        if verbose > 1:
+            print(f"passwd: '{passwd}'")
     else:
-        # print('recreate_succeeded: no')
         if verbose:
             print('fail')
-            # print(f"out: {out}")
-            # print(f"err: {err}")
+        if verbose > 1:
+            print(f"out: {out}")
+            print(f"err: {err}")
         raise SystemExit(1)
     return passwd
 
@@ -423,7 +416,13 @@ def auto_decrypt(gpg, working_dir, verbose, verify_key=None):
 ########
 
 def main(args):
-    verbose = bool(args['--verbose'])
+    if args['--debug']:
+        verbose = 2
+    elif args['--verbose']:
+        verbose = 1
+    else:
+        verbose = 0
+    # verbose = bool(args['--verbose'])
     # with tempfile.TemporaryDirectory() as home:
     home = mkdtemp() # TODO use a context or handle exceptions
     gpg = create_keyring(home, verbose)
