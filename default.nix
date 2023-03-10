@@ -35,9 +35,26 @@ in pkgs.stdenv.mkDerivation rec {
   '';
 
   installPhase = ''
+
     mkdir -p $out/bin
     install -m755 horcrux $out/bin/horcrux
     wrapProgram $out/bin/horcrux \
       --prefix PATH : ${pkgs.lib.makeBinPath buildInputs}
+
+    mkdir -p $out/test
+    for f in $src/test/*.sh; do
+      install -m755 $f $out/test/$(basename $f)
+      wrapProgram $out/test/$(basename $f) \
+        --prefix PATH : $out/bin:${pkgs.lib.makeBinPath buildInputs}
+    done
+
+    ln -s $out/test/test.sh $out/bin/horcrux-test
+
   '';
+
+  # doCheck = true;
+  # checkPhase = ''
+  #   source $stdenv/setup
+  #   $out/test/test.sh
+  # '';
 }
