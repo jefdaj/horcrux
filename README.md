@@ -29,7 +29,7 @@ These videos are probably the best starting point:
 
 * [Horcrux 4/7: verify, decrypt](https://vimeo.com/448106558)
 
-See also the rest of this readme, [usage.txt][1], or [the test scripts][2].
+See also the rest of this readme, [help.txt][1], or [the test scripts][2].
 
 I'm just a normal person. Why do I need that?
 ---------------------------------------------
@@ -281,7 +281,7 @@ I accept donations of any other crypto too! Just email or open an issue.
 | Litecoin | `MBBgdzToFS3aY2yrqu4F42RLvoo8iw6cNF` |
 
 
-[1]: ./usage.txt
+[1]: ./test/01-help.txt
 [2]: ./tests/
 [4]: https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing
 [5]: https://www.gnupg.org
