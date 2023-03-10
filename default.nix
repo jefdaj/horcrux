@@ -20,7 +20,8 @@ in pkgs.stdenv.mkDerivation rec {
     pwgen # pwgen-secure?
     qrencode
     ssss
-    stegseek # TODO is it better than steghide, or is that deprecated?
+    # stegseek # TODO is it better than steghide, or is that deprecated?
+    steghide
 
     (python3.withPackages (ps: with ps; [
       docopt
