@@ -42,6 +42,7 @@ in pkgs.stdenv.mkDerivation rec {
       --prefix PATH : ${pkgs.lib.makeBinPath buildInputs}
 
     mkdir -p $out/test
+    cp test/example.* $out/test/
     for f in $src/test/*.sh; do
       install -m755 $f $out/test/$(basename $f)
       wrapProgram $out/test/$(basename $f) \
