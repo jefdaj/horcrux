@@ -10,4 +10,5 @@ expect "confirm password to shield the signing key: "; send "testpass1\n"
 expect eof
 END
 
+echo
 wc -l my-first-horcrux/*
