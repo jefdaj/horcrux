@@ -17,7 +17,7 @@ Usage:
 
 Options:
   -h --help        Show this text.
-  -v --verbose     Print a lot of messages.
+  -v --verbose     Print progress messages.
   <output-dir>     Where to put the generated keys [default: .]
   -s <sign-key>    Use an existing PGP private key as your signing key
   -p <verify-key>  Use an existing PGP public key as your verification key
@@ -196,6 +196,15 @@ def encrypt(gpg, encrypt_key, sign_key, before, after, verbose):
 # verify #
 ##########
 
+def find_signature(signed_file):
+    sig_file = signed_file + '.sig'
+    asc_file = signed_file + '.asc'
+    if exists(sig_file):
+        return sig_file
+    if exists(asc_file):
+        return asc_file
+    return None
+
 def verify(gpg, verify_key, signed_file, verbose):
     if not exists(signed_file):
         print("WARNING: can't verify %s because the file is missing" % basename(signed_file))
@@ -203,15 +212,10 @@ def verify(gpg, verify_key, signed_file, verbose):
     import_key(gpg, verify_key, verbose)
     if verbose:
         print('verifying %s with %s' % (signed_file, verify_key))
-    sig_file = signed_file + '.sig'
-    asc_file = signed_file + '.asc'
-    if exists(sig_file):
-        signature = sig_file
-    elif exists(asc_file):
-        signature = asc_file
-    else:
+    signature = find_signature(signed_file)
+    if signature is None:
         print('ERROR! missing signature for %s' % signed_file)
-    # turns out the signature IS bad... next step figure out why
+        return # TODO execption here?
     with open(signature, 'rb') as f:
         success = gpg.verify_file(f, data_filename=signed_file)
     if success:
@@ -239,7 +243,7 @@ def recreate_succeeded(stdout, stderr):
 
 def recreate_password(threshold, share_paths, stego_pass, verbose):
     if verbose:
-        print('trying to reconstruct master password from %d shares...' % threshold,)
+        print('trying to reconstruct master password from %d shares...' % threshold, end='')
     cmd = ['ssss-combine', '-t', str(threshold)]
     shares = '' # newline-separated list of shares
     for path in share_paths:
@@ -264,13 +268,14 @@ def recreate_password(threshold, share_paths, stego_pass, verbose):
         # print('recreate_succeeded: yes')
         if verbose:
             print('success!')
-            print(f"passwd: '{passwd}'")
+            # TODO allow this but have a debug flag for it!
+            # print(f"passwd: '{passwd}'")
     else:
         # print('recreate_succeeded: no')
         if verbose:
             print('fail')
-            print(f"out: {out}")
-            print(f"err: {err}")
+            # print(f"out: {out}")
+            # print(f"err: {err}")
         raise SystemExit(1)
     return passwd
 
@@ -411,7 +416,7 @@ def auto_decrypt(gpg, working_dir, verbose, verify_key=None):
     master_pass = auto_recreate_password(shares, stego_pass, verbose)
     for secret in secrets:
         outfile = splitext(secret)[0]
-        decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose)
+        decrypt(gpg, decrypt_key, secret, outfile, master_pass, verbose) # TODO verify_key?
 
 ########
 # main #
