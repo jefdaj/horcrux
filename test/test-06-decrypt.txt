@@ -1,20 +1,25 @@
+decrypt should succeed only with 3+ keys:
+
 trying to decrypt with 1 keys...
 failed to reconstruct master password
-(this is expected)
+test passed
 
 trying to decrypt with 2 keys...
 failed to reconstruct master password
-(this is expected)
+test passed
 
 trying to decrypt with 3 keys...
 verified signature for secret1.txt.gpg
 decrypted secret-decrypted.txt
+test passed
 
 trying to decrypt with 4 keys...
 verified signature for secret1.txt.gpg
 decrypted secret-decrypted.txt
+test passed
 
 trying to decrypt with 5 keys...
 verified signature for secret1.txt.gpg
 decrypted secret-decrypted.txt
+test passed
 
