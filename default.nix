@@ -44,6 +44,7 @@ in pkgs.stdenv.mkDerivation rec {
 
     mkdir -p $out/test
     cp test/example.* $out/test/
+    cp test/test-*-*.txt $out/test/
     for f in $src/test/*.sh; do
       install -m755 $f $out/test/$(basename $f)
       wrapProgram $out/test/$(basename $f) \
