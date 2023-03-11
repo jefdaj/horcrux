@@ -13,6 +13,7 @@ in pkgs.stdenv.mkDerivation rec {
   buildInputs = with pkgs; [
 
     expect      # only used by test scripts
+    which       # only used by test scripts
     makeWrapper # only used by nix install
     unzip       # TODO remove?
 
