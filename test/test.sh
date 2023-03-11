@@ -4,7 +4,7 @@
 test_dir="$1"
 [[ -z "$test_dir" ]] && test_dir="$(mktemp -d)"
 
-echo "test_dir: $test_dir"
+echo "test files + logs will be in $test_dir"
 
 export SRC_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 export PATH="$SRC_DIR":$PATH
