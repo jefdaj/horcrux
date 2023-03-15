@@ -26,6 +26,7 @@ Options:
 
 # TODO make permissions accessible to non-root user
 # TODO if it exists, pick up HORCRUX_KEY_DIR
+# TODO capitalize messages
 
 from docopt     import docopt
 from glob       import glob
@@ -50,7 +51,7 @@ def create_password(nchars, verbose):
         print('that way it will be secure even if your os has been compromised!')
         print('just randomly mash out something up to %d characters long,' % (nchars / 2))
         print('and the rest will be filled in using the system random number generator.')
-    msg = "enter up to %d alphanumeric chars to mix in to the master password: " % (nchars / 2)
+    msg = "enter up to %d alphanumeric chars to contribute randomness: " % (nchars / 2)
     user_chars = input(msg).replace('\n', '')[:65]
     nchars = nchars - len(user_chars)
     cmd = ['pwgen', '--secure', str(nchars), '1']
@@ -136,7 +137,7 @@ def setup(gpg, threshold, nshares, output_dir, verbose=False, sign_key=None):
     decrypt_passwd = create_password(128, verbose)
     create_keypair(gpg, 'encrypt', 'decrypt', decrypt_passwd, output_dir, verbose)
     if sign_key is None:
-        sign_passwd = prompt_password('to shield the signing key', confirm=True)
+        sign_passwd = prompt_password('for the signing key', confirm=True)
         create_keypair(gpg, 'verify', 'sign', sign_passwd, output_dir, verbose)
     else:
         sign_passwd = prompt_sign_passwd(sign_key)
