@@ -145,6 +145,7 @@ backups:
 * [Horcrux 2/7: TAILS install](https://vimeo.com/451246720) (skip this one unless you know you want to bother installing it)
 
 * [Horcrux 3/7: setup, encrypt, sign, distribute](https://vimeo.com/448105867)
+  (start here for practical usage examples)
 
 * [Horcrux 4/7: verify, decrypt](https://vimeo.com/448106558)
 
