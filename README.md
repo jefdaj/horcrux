@@ -3,6 +3,8 @@ Horcrux: immortality for your encrypted backups
 
 <img src="assets/logo.png" width="700" align="center">
 
+*Skip to [Developer QuickStart](#developer-quickstart) if you just want to try it fast.*
+
 Horcrux is a Python script that glues a few well-known, trustworthy tools
 together for "Voldemort-style" encrypted backups. You can encrypt new
 files at any time, but decrypting them again requires gathering `N` of `M`
@@ -18,10 +20,6 @@ It's free and open source. Tip whatever you think it's worth (links at the
 bottom). All I ask is during the next bull run, if you suddenly have a scary
 amount of money, spare a thought for the little project that keeps it from
 actually being scary!
-
-# Quick Start
-
-![](./demo/install.gif)
 
 # Detailed Start
 
@@ -136,6 +134,16 @@ The offline environment might seem like too much work, but is necessary if you
 want to protect something important, like cryptocurrency or highly sensitive documents.
 Computers get hacked all the time!
 
+
+# Developer QuickStart
+
+## Install
+
+You'll need [Nix][nix], but then it's simple:
+
+![](./demo/install.gif)
+
+## Demo
 
 Generic install
 ---------------
@@ -296,3 +304,4 @@ I accept donations of any other crypto too! Just email or open an issue.
 [7]: https://www.qubes-os.org/doc/split-gpg/
 [8]: https://tails.boum.org/
 [9]: https://tails.boum.org/install/
+[nix]: https://nixos.org/download.html#download-nix
