@@ -268,7 +268,7 @@ def recreate_password(threshold, share_paths, stego_pass, verbose):
         with open(path, 'r') as f:
             shares += f.read() #.decode('utf-8')
     if verbose > 1:
-        print(f"shares: '{shares}'", flush=True)
+        print(f"shares:\n'{shares}'", flush=True)
     proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True)
     (out, err) = proc.communicate(shares)
     proc.wait() # TODO does this help?
