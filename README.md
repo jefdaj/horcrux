@@ -1,9 +1,10 @@
 Horcrux: immortality for your encrypted backups
 ===============================================
 
-<img src="assets/logo.png" width="700" align="center">
+<img src="assets/logo.png" align="center">
 
-*Skip to [Developer QuickStart](#developer-quickstart) if you just want to try it fast.*
+*Skip to [Developer QuickStart](#developer-quickstart) if you just want
+to try it fast.*
 
 Horcrux is a Python script that glues a few well-known, trustworthy tools
 together for "Voldemort-style" encrypted backups. You can encrypt new
@@ -20,21 +21,6 @@ It's free and open source. Tip whatever you think it's worth (links at the
 bottom). All I ask is during the next bull run, if you suddenly have a scary
 amount of money, spare a thought for the little project that keeps it from
 actually being scary!
-
-# Detailed Start
-
-These videos are a little slow but they go from zero to secure encrypted
-backups:
-
-* [Horcrux 1/7: the master plan](https://vimeo.com/446693379)
-
-* [Horcrux 2/7: TAILS install](https://vimeo.com/451246720) (skip this one unless you know you want to bother installing it)
-
-* [Horcrux 3/7: setup, encrypt, sign, distribute](https://vimeo.com/448105867)
-
-* [Horcrux 4/7: verify, decrypt](https://vimeo.com/448106558)
-
-See also the rest of this readme, [the help output][1], or [the test scripts][2].
 
 I'm just a normal person. Why do I need that?
 ---------------------------------------------
@@ -139,11 +125,31 @@ Computers get hacked all the time!
 
 ## Install
 
-You'll need [Nix][nix], but then it's simple:
+You need [Nix][nix], but then the rest is easy:
 
 ![](./demo/install.gif)
 
-## Demo
+## Usage
+
+Might be better viewed in a new tab.
+
+![](./demo/basics.gif)
+
+# Detailed Start
+
+These videos are a little slow but they go from zero to secure encrypted
+backups:
+
+* [Horcrux 1/7: the master plan](https://vimeo.com/446693379)
+
+* [Horcrux 2/7: TAILS install](https://vimeo.com/451246720) (skip this one unless you know you want to bother installing it)
+
+* [Horcrux 3/7: setup, encrypt, sign, distribute](https://vimeo.com/448105867)
+
+* [Horcrux 4/7: verify, decrypt](https://vimeo.com/448106558)
+
+See also the rest of this readme, [the help output][1], or [the test scripts][2].
+
 
 Generic install
 ---------------
