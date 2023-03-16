@@ -3,5 +3,5 @@ verified signature for horcrux-02.key
 verified signature for horcrux-03.key
 verified signature for horcrux-04.key
 verified signature for horcrux-05.key
-WARNING: can't verify secret1.txt because the file is missing
+WARNING: secret1.txt.sig missing signed data. Expected it to be in secret1.txt
 verified signature for secret1.txt.gpg
