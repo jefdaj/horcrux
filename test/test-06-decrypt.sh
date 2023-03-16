@@ -8,6 +8,7 @@ threshold=3
 echo "decrypt should succeed only with ${threshold}+ keys:"
 echo
 
+# decrypt
 for n_keys in {1..5}; do
   rm -f secret-decrypted.txt
   keys="$(ls horcrux-*.key | shuf | head -n ${n_keys})"
@@ -20,3 +21,7 @@ for n_keys in {1..5}; do
   [[ $n_keys -ge $threshold && $exit_code -eq 0 ]] && echo "test passed"
   echo
 done
+
+# check decrypted file matches original
+horcrux verify verify.key secret1.txt
+wc -l secret1.txt
