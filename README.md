@@ -19,7 +19,14 @@ bottom). All I ask is during the next bull run, if you suddenly have a scary
 amount of money, spare a thought for the little project that keeps it from
 actually being scary!
 
-These videos are probably the best starting point:
+# Quick Start
+
+![](./demo/install.gif)
+
+# Detailed Start
+
+These videos are a little slow but they go from zero to secure encrypted
+backups:
 
 * [Horcrux 1/7: the master plan](https://vimeo.com/446693379)
 
