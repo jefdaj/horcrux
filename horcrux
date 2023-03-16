@@ -221,7 +221,7 @@ def verify(gpg, verify_key, signed_file, verbose):
     elif signature is not None and not exists(signed_file):
         sig = basename(signature)
         dat = basename(signed_file)
-        msg = f"WARNING: {sig} missing signed data. Expected {dat}"
+        msg = f"WARNING: {sig} missing signed data. Expected it to be in {dat}"
         print(msg, flush=True)
         return
     with open(signature, 'rb') as f:
@@ -240,17 +240,16 @@ def extract_master_password(stdout, stderr):
     if 'FATAL:' in stderr:
         return None
     # option 2: password is in stdout
+    # (may also be a failed password with dots)
     passwd = stdout.strip()
-    if len(passwd) == 128:
+    if len(passwd) == 128 and passwd.count('.') == 0:
         return passwd
-    # option 3: password is in stdout along with a message
+    # option 3: password is in stderr along with a message
+    # (may also be a failed password with dots)
     passwd = stderr.split()[-1]
-    if len(passwd) == 128:
+    if len(passwd) == 128 and passwd.count('.') == 0:
         return passwd
-    # option 4: ssss-combine printed a failed reconstruction with dots
-    if stdout.count('.') > 0:
-        return None
-    # something unexpected
+    # something else unexpected
     if verbose > 1:
         msg = '\n'.join([
             "Unexpected ssss-combine output.",
@@ -294,7 +293,7 @@ def auto_recreate_password(share_paths, stego_pass, verbose):
         except:
             # raise
             continue
-    print('ERROR: failed to reconstruct master password', flush=True)
+    print('failed to reconstruct master password', flush=True)
     raise SystemExit(1)
 
 def untar(tarfile, extension, verbose):
