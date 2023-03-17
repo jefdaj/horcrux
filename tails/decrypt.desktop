@@ -1,5 +1,5 @@
 [Desktop Entry]
-Version=1.0
+Version=0.4
 Name=decrypt
 Comment=immortality for your encrypted backups
 Exec=gnome-terminal -e 'bash -c "sudo /live/persistence/TailsData_unlocked/horcrux/horcrux -v autodecrypt %f; read -n1"'

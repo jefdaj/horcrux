@@ -12,7 +12,7 @@ let
 
 in nixpkgs.pkgs.stdenv.mkDerivation rec {
   name = "horcrux-${version}";
-  version = "0.9";
+  version = "0.4";
   src = ./.;
   buildInputs = with nixpkgs.pkgs; [
 
