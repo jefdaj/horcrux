@@ -1,7 +1,7 @@
 Horcrux: immortality for your encrypted backups
 ===============================================
 
-<img src="assets/logo.png" align="center">
+<img src="banner.png" align="center">
 
 *Skip to [Developer QuickStart](#developer-quickstart) if you just want
 to try it fast.*
