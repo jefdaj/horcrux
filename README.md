@@ -137,8 +137,7 @@ Might be better viewed in a new tab.
 
 # Detailed Start
 
-These videos are a little slow but they go from zero to secure encrypted
-backups:
+These videos are a little slow (try 1.5X or 2X speed!) but they go all the way from zero to secure encrypted backups:
 
 * [Horcrux 1/7: the master plan](https://vimeo.com/446693379)
 
@@ -148,6 +147,8 @@ backups:
   (start here for practical usage examples)
 
 * [Horcrux 4/7: verify, decrypt](https://vimeo.com/448106558)
+
+There's some useful [general advice][advice] at the end of video 4, which maybe should have been in the first one.
 
 See also the rest of this readme, [the help output][1], or [the test scripts][2].
 
@@ -312,3 +313,4 @@ I accept donations of any other crypto too! Just email or open an issue.
 [8]: https://tails.boum.org/
 [9]: https://tails.boum.org/install/
 [nix]: https://nixos.org/download.html#download-nix
+[advice]: https://vimeo.com/448106558#t=501s
