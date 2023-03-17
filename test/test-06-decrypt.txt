@@ -10,16 +10,16 @@ test passed
 
 trying to decrypt with 3 keys...
 verified signature for secret1.txt.gpg
-decrypted secret-decrypted.txt
+decrypted secret1-decrypted.txt
 test passed
 
 trying to decrypt with 4 keys...
 verified signature for secret1.txt.gpg
-decrypted secret-decrypted.txt
+decrypted secret1-decrypted.txt
 test passed
 
 trying to decrypt with 5 keys...
 verified signature for secret1.txt.gpg
-decrypted secret-decrypted.txt
+decrypted secret1-decrypted.txt
 test passed
 
