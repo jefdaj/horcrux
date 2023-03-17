@@ -176,8 +176,7 @@ def encrypt_file(gpg, recipient, before_path, after_path, verbose):
     if verbose:
         print('encrypting %s to "%s" (output in %s)' \
                % (before_path, recipient, after_path), flush=True)
-    # TODO is this one ok without binary?
-    with open(before_path, 'r') as f:
+    with open(before_path, 'rb') as f:
         status = gpg.encrypt_file(f, recipients=[recipient],
                                   output=after_path, always_trust=True)
     if not status.ok:
