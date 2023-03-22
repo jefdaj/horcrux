@@ -204,22 +204,25 @@ computer in the future. You'll need to:
 
 1. Download and install TAILS on a USB drive. See [the site][9] for instructions.
 
-2. Reboot into TAILS, setting a temporary root password at the login screen.
-   Connect to your wifi in the upper right corner menu.
+2. Reboot into TAILS. Click the button to create persistent storage, then Start.
 
-3. Create a persistent volume:
+3. The persistent volume wizard should pop up after the desktop starts.
+   Set a good, memorable password.
+   Then enable at least `Persistent Folder`, `Additional Software`, and `Dotfiles`.
+   Do NOT check `Network Connections`! You want it to forget your wifi
+   password. The wizard auto-saves, so just close it.
 
-     * `Applications` -> `System Tools` -> `Configure Persistent Volume`
+5. Reboot and unlock your new persistent storage on the Welcome screen.
+   Also set a temporary root password (plus sign at the bottom) so you can
+   install software.
 
-     * Enable at least `Personal Data`, `Additional Software`, and `Dotfiles`.
-       You probably want to disable `Network Connections` to prevent auto-connecting
-       to your wifi later.
+6. Connect to your wifi in the upper right corner menu.
 
-4. Open `Applications` -> `Tor Browser` and navigate to this site (`https://github.com/jefdaj/horcrux`).
+7. Open `Applications` -> `Tor Browser` and navigate to this site (`https://github.com/jefdaj/horcrux`).
    Click `Code` -> `Download ZIP` to download the source code.
    In the next step we'll move it into place and install dependencies.
 
-5. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
+8. Open a root terminal (`Applications` -> `System Tools` -> `Root terminal`),
    put in the temporary root password, and run these commands one at a time. You can copy +
    paste them from here if you like. When prompted, confirm that you want to make
    the software persistent.
@@ -239,11 +242,11 @@ computer in the future. You'll need to:
    Assuming that all went well, you should now be able to run the test scripts.
    (See the Generic Install above)
 
-5. Reboot one more time so you can `Disable all networking` at the startup
+10. Reboot one more time so you can `Disable all networking` at the startup
    screen before generating your real keys. To check that horcrux installed correctly,
    open a new (non-root) terminal and type `horcrux -h`. You should see the help message.
 
-6. This last step is optional, but good if you plan to give copies of TAILS to
+11. This last step is optional, but good if you plan to give copies of TAILS to
    other people as part of a will. The [tails folder in this repo](./tails/)
    contains two Linux application launcher shortcuts (the `.desktop` files). You
    can put them in `/home/amnesia/Persistent` and use them to do the `verify` and
