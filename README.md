@@ -20,22 +20,22 @@ amount of money, spare a thought for the little project that keeps it from
 actually being scary!
 
 
-# Tutorial videos
+Tutorial videos
+---------------
 
 These videos are probably the best entry point if you want to be confident managing your secret keys. They're a little slow (try 1.5X or 2X speed!) but they go all the way from zero to secure encrypted backups and explain everything in detail.
-
-*Skip to [Developer QuickStart](#developer-quickstart) instead if you know your way around the command line and just want to try it fast.*
 
 * [Horcrux 1/7: the master plan](https://vimeo.com/446693379)
 
 * [Horcrux 2/7: TAILS install](https://vimeo.com/451246720)
 
 * [Horcrux 3/7: setup, encrypt, sign, distribute](https://vimeo.com/448105867)
-  (start here for practical usage examples)
 
 * [Horcrux 4/7: verify, decrypt](https://vimeo.com/448106558)
-  There's some useful [general advice][advice] at the end of this one too,
-	which maybe should have been in the video 1.
+  There's some useful [general advice][advice] at the end too,
+  which maybe should have been in the video 1.
+
+*Skip to [Developer QuickStart](#developer-quickstart) instead if you know your way around the command line and just want to try it fast.*
 
 
 I'm just a normal person. Why do I need that?
@@ -160,25 +160,25 @@ their equivalents:
 
 * gnupg
 * pwgen
-* python2 (2.7 ideally)
-* python-docopt
-* python-gnupg
+* python3
+* python3-docopt
+* python3-gnupg
 * ssss
-* steghide (optional, for hide and unhide)
-* qrencode (optional, for QR codes)
-* expect (optional, for running the test scripts)
-* unzip (for extracting the code)
+* steghide
+* qrencode
+* expect
+* unzip
 
 They're easy to get in Debian, Ubuntu, or a similar distro:
 
-     apt install gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect
+     apt install gnupg pwgen python3 python3-docopt python3-gnupg ssss steghide qrencode expect
 
 Once you have the dependencies, clone this repository and check that it works
 with the included test scripts. It should look something like this:
 
      git clone https://github.com/jefdaj/horcrux
      cd horcrux
-     ./test.sh
+     ./test/test.sh
      running 00-deps.sh... ok
      running 01-help.sh... ok
      running 02-setup.sh... ok
@@ -225,11 +225,13 @@ computer in the future. You'll need to:
    the software persistent.
 
      ```
-     apt install -y gnupg pwgen python python-docopt python-gnupg ssss steghide qrencode expect unzip
+     apt update
+     apt install -y gnupg pwgen python3 python3-docopt python3-gnupg ssss steghide qrencode expect unzip
      cd /live/persistence/TailsData_unlocked
      unzip /home/amnesia/Tor\ Browser/horcrux-*.zip
      mv horcrux-* horcrux
      chown amnesia:amnesia horcrux -R
+     mv horcrux/tails/*.desktop Persistent/
      mv /home/amnesia/.bashrc dotfiles/
      echo 'export PATH=/live/persistence/TailsData_unlocked/horcrux:$PATH' >> dotfiles/.bashrc
      ```

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=0.4
+Name=horcrux-decrypt
+Comment=Drag a folder here to auto-decrypt with horcrux
+Exec=gnome-terminal -e 'bash -c "/live/persistence/TailsData_unlocked/horcrux/horcrux -v autodecrypt %f; read -n1"'
+Icon=utilities-terminal
+Terminal=false
+Type=Application
+Categories=Application;
