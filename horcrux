@@ -72,7 +72,8 @@ def create_shares(gpg, decrypt_passwd, sign_passwd, threshold, nshares, output_d
     if verbose > 1:
         print("stdout:")
         print(out, flush=True)
-    shares = [l for l in out.split('\n') if len(l) > 0]
+    share_regex = '^[0-9]{1,}-[a-z0-9]{128,}' # TODO require 256?
+    shares = [l for l in out.split('\n') if match(share_regex, l)]
     if verbose > 1:
         print(shares)
     assert len(shares) == nshares
