@@ -1,4 +1,5 @@
 { expect
+, file
 , gnupg
 , lib
 , makeWrapper
@@ -24,6 +25,7 @@ in stdenv.mkDerivation rec {
   src = ./.;
   buildInputs = [
 
+    file        # only used by test scripts?
     expect      # only used by test scripts
     which       # only used by test scripts
     makeWrapper # only used by nix install
