@@ -1,21 +1,28 @@
-let
-  # nixpkgs = import (builtins.fetchTarball {
-  #   name = "nixos-unstable-2023-03-15";
-  #   url = "https://github.com/nixos/nixpkgs/archive/eec97855384951087980a9596af6f69a0e0bdfa1.tar.gz";
-  #   sha256 = "0v13l0rwlg4g0pxbsg2nj823pkv9my6p6zfjnf018d3d0npz6b8i";
-  # }) {};
-  nixpkgs = import <nixpkgs> {};
+{ expect
+, gnupg
+, lib
+, makeWrapper
+, pwgen # pwgen-secure?
+, python3
+, qrencode
+, ssss
+, stdenv
+, steghide
+, unzip
+, which
+}:
 
-  myPython = nixpkgs.python3.withPackages (ps: with ps; [
+let
+  myPython = python3.withPackages (ps: with ps; [
     docopt
     python-gnupg
   ]);
 
-in nixpkgs.pkgs.stdenv.mkDerivation rec {
+in stdenv.mkDerivation rec {
   name = "horcrux-${version}";
   version = "0.4";
   src = ./.;
-  buildInputs = with nixpkgs.pkgs; [
+  buildInputs = [
 
     expect      # only used by test scripts
     which       # only used by test scripts
@@ -28,10 +35,7 @@ in nixpkgs.pkgs.stdenv.mkDerivation rec {
     ssss
     steghide
 
-    (python3.withPackages (ps: with ps; [
-      docopt
-      python-gnupg
-    ]))
+    myPython
 
   ];
 
@@ -44,7 +48,7 @@ in nixpkgs.pkgs.stdenv.mkDerivation rec {
     mkdir -p $out/bin
     install -m755 horcrux $out/bin/horcrux
     wrapProgram $out/bin/horcrux \
-      --prefix PATH : ${nixpkgs.pkgs.lib.makeBinPath buildInputs}
+      --prefix PATH : ${lib.makeBinPath buildInputs}
 
     mkdir -p $out/test
     cp test/example.* $out/test/
@@ -52,7 +56,7 @@ in nixpkgs.pkgs.stdenv.mkDerivation rec {
     for f in $src/test/*.sh; do
       install -m755 $f $out/test/$(basename $f)
       wrapProgram $out/test/$(basename $f) \
-        --prefix PATH : $out/bin:${nixpkgs.pkgs.lib.makeBinPath buildInputs}
+        --prefix PATH : $out/bin:${lib.makeBinPath buildInputs}
     done
 
     ln -s $out/test/test.sh $out/bin/horcrux-test
