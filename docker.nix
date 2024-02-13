@@ -2,8 +2,9 @@
 , pkgsLinux ? import <nixpkgs> { system = "x86_64-linux"; }
 }:
 
-let horcrux = import ./default.nix;
+let horcrux = pkgs.callPackage ./default.nix {};
 
+# TODO buildLayeredImage?
 in pkgs.dockerTools.buildImage {
   name = "horcrux";
   config = {
