@@ -13,7 +13,8 @@ done
 
 export SRC_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 export PATH="$SRC_DIR":$PATH
-export TEST_DIR="$(mktemp -d)"
+mkdir -p "$TMPDIR"
+export TEST_DIR="$(mktemp -d --tmpdir="$TMPDIR")"
 
 rm_test_dir() { rm -r "$TEST_DIR"; }
 

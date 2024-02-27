@@ -5,8 +5,7 @@
 let
   horcrux = pkgs.callPackage ./package.nix {};
 
-# TODO buildLayeredImage?
-in pkgs.dockerTools.buildImage {
+in pkgs.dockerTools.buildLayeredImage {
   name = "horcrux";
   config = {
     Cmd = [ "${horcrux}/bin/horcrux" ];
