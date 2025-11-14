@@ -1,7 +1,7 @@
 {
   description = "Horcrux test flake";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
   };
   outputs = { self, nixpkgs }@inputs: {
     # TODO which other systems will also work?
