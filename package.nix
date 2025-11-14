@@ -11,6 +11,7 @@
 , steghide
 , unzip
 , which
+, bats
 }:
 
 let
@@ -30,6 +31,7 @@ in stdenv.mkDerivation rec {
     which       # only used by test scripts
     makeWrapper # only used by nix install
     unzip       # TODO remove?
+    bats
 
     gnupg
     pwgen # pwgen-secure?
