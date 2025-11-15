@@ -27,7 +27,7 @@ setup() {
   assert_output -p "Split secrets using Shamir's Secret Sharing Scheme."
 }
 
-@test "prints usage if no args" {
-  run horcrux
-  assert_output -p "Usage:"
+@test "expect installed" {
+  run expect -h
+  assert_output -p "usage: expect [-div] [-c cmds] [[-f] cmdfile] [args]"
 }
