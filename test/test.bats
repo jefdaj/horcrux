@@ -1,14 +1,15 @@
 #!/usr/bin/env bats
 
-# TODO how to get this to execute inside `nix develop` shell or similar?
+# TODO is this a bad idea?
+# setup_file() {
+#   nix build
+# }
 
 setup() {
   load 'test_helper/bats-support/load'
   load 'test_helper/bats-assert/load'
-  # TODO ensure nix build first?
   DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
   PATH="$DIR/../result/bin":$PATH
-  # echo "PATH: $PATH"
 }
 
 @test "correct python3 installed" {
