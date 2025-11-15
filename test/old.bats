@@ -1,11 +1,26 @@
 # rewrite old tests 1-1 in bats
-# TODO can they be run sequentially as a single "scenario"?
+# usage:
+#   bats test
+#   BATSLIB_TEMP_PRESERVE=1 bats test
+
+setup_file() {
+  load 'test_helper/bats-support/load'
+  load 'test_helper/bats-file/load'
+  export TEST_TEMP_DIR="$(temp_make)"
+}
+
+teardown_file() {
+  # TODO how safe is this?
+  temp_del "$TEST_TEMP_DIR"
+}
 
 setup() {
   load 'test_helper/bats-support/load'
   load 'test_helper/bats-assert/load'
+  # load 'test_helper/bats-file/load'
   DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
   PATH="$DIR/../result/bin":$PATH
+  cd "$TEST_TEMP_DIR"
 }
 
 @test "old test 01: help" {
