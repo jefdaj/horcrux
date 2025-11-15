@@ -13,6 +13,8 @@ setup_file() {
   export N_SHARES_THRESHOLD=3
   export N_SHARES_TOTAL=5
   export HORCRUX_DIRNAME='my-first-horcrux'
+  export SECRET_TEXT='this could be some secret text'
+  export SIGN_KEY_PASSWORD='testpass1'
 }
 
 teardown_file() {
@@ -42,8 +44,8 @@ set timeout 10
 spawn horcrux setup $N_SHARES_THRESHOLD $N_SHARES_TOTAL $HORCRUX_DIRNAME
 expect "enter up to 64 alphanumeric chars to mix in to the master password: "
 send "0r9epwi;tkqwupuoi;qer]asdf\n"
-expect "enter a password for the signing key: "; send "testpass1\n"
-expect "confirm password for the signing key: "; send "testpass1\n"
+expect "enter a password for the signing key: "; send "${SIGN_KEY_PASSWORD}\n"
+expect "confirm password for the signing key: "; send "${SIGN_KEY_PASSWORD}\n"
 expect eof
 END
 
@@ -57,4 +59,18 @@ END
     assert_exists "$share_path"
     assert_exists "${share_path}.sig"
   done
+}
+
+@test "old test 03: sign" {
+  cd "$HORCRUX_DIRNAME"
+  echo "$SECRET_TEXT" > secret1.txt
+  expect << END
+set timeout 10
+spawn horcrux sign sign.key secret1.txt
+expect "enter a password to unlock sign.key: "
+send -- "${SIGN_KEY_PASSWORD}\n"
+expect eof
+END
+  assert_file_contains secret1.txt "$SECRET_TEXT" grep
+  assert_file_contains secret1.txt.sig "END PGP SIGNATURE" grep
 }
